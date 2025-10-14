@@ -25,8 +25,7 @@ export function useGeo(options: Options = {}) {
         return
       }
       try {
-        // @ts-expect-error - permission name literal
-        const res: PermissionStatus = await (navigator.permissions as any).query({ name: "geolocation" })
+        const res: PermissionStatus = await ((navigator as any).permissions as any).query({ name: "geolocation" })
         if (cancelled) return
         if (res.state === "granted") setStatus("granted")
         else if (res.state === "denied") setStatus("denied")
