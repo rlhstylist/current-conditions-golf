@@ -1,32 +1,15 @@
 ﻿export type Units = "imperial" | "metric"
 
-export const toC = (f: number) => (f - 32) * 5/9
-export const toF = (c: number) => (c * 9/5) + 32
-export const mpsToMph = (m: number) => m * 2.23693629
-export const mphToMps = (m: number) => m / 2.23693629
-
-export function formatTemp(v: number | null | undefined, u: Units){
-  if (v==null) return "—"
-  const val = u==="imperial" ? toF(v) : v
-  return `${Math.round(val)}°${u==="imperial"?"F":"C"}`
+export function formatSpeed(v: number, u: Units) {
+  return u === "imperial" ? `${(v * 2.23694).toFixed(0)} mph` : `${v.toFixed(0)} m/s`
 }
-
-export function formatSpeed(v: number | null | undefined, u: Units){
-  if (v==null) return "—"
-  const val = u==="imperial" ? mpsToMph(v) : v
-  return `${Math.round(val)} ${u==="imperial"?"mph":"m·s⁻¹"}`
+export function formatTemp(v: number, u: Units) {
+  return u === "imperial" ? `${(v * 9/5 + 32).toFixed(0)} °F` : `${v.toFixed(0)} °C`
 }
-
-export function formatDir(d: number | null | undefined){
-  if (d==null) return "—"
-  const dirs = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]
-  return `${dirs[Math.round(d/22.5)%16]} ${Math.round(d)}°`
+export function formatDir(deg: number) {
+  const dirs = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW","N"]
+  return dirs[Math.round(deg/22.5)]
 }
-
-export const mmToIn = (mm:number)=> mm/25.4
-export function formatPrecip(mm: number | null | undefined, u: Units){
-  if (mm==null) return "—"
-  const v = u==="imperial" ? mmToIn(mm) : mm
-  const r = v<1 ? Math.round(v*10)/10 : Math.round(v)
-  return `${r}${u==="imperial"?"in":"mm"}`
+export function formatPrecip(mm: number, u: Units) {
+  return u === "imperial" ? `${(mm / 25.4).toFixed(2)} in` : `${mm.toFixed(1)} mm`
 }

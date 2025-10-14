@@ -1,35 +1,37 @@
-﻿type GeoStatus = "idle"|"prompt"|"granted"|"denied"
-export type Geo = { status: GeoStatus; coords?: {lat:number, lon:number} }
+﻿import { useEffect, useState } from "react"
 
-const KEY = "ccg_geo_cache_v1"
+export type GeoState =
+  | { status: "prompt" | "denied"; coords?: undefined }
+  | { status: "granted"; coords: { lat: number; lon: number } }
 
-export function useGeo(): [Geo, ()=>void]{
-  // lazy state to avoid SSR mismatch
-  const s = (window.localStorage.getItem(KEY))
-  const init: Geo = s ? JSON.parse(s) : { status:"idle" }
-  let geo = init
+export function useGeo() {
+  const [geo, setGeo] = useState<GeoState>({ status: "prompt" })
 
-  function save(){
-    localStorage.setItem(KEY, JSON.stringify(geo))
-  }
-
-  async function request(){
-    if (!("geolocation" in navigator)){
-      geo = { status:"denied" }
-      save(); return
+  useEffect(() => {
+    // Probe permission (best-effort)
+    const perms = (navigator as any).permissions
+    if (perms?.query) {
+      perms.query({ name: "geolocation" as any })
+        .then((p: any) => setGeo((g) => (g.status === "granted" ? g : { status: p.state as "prompt" | "denied" })))
+        .catch(() => {})
     }
-    geo = { status:"prompt" }; save()
-    await new Promise<void>((resolve)=>{
+  }, [])
+
+  const request = () =>
+    new Promise<GeoState>((resolve) => {
+      if (!("geolocation" in navigator)) {
+        const v = { status: "denied" as const }
+        setGeo(v); resolve(v); return
+      }
       navigator.geolocation.getCurrentPosition(
-        p => {
-          geo = { status:"granted", coords:{ lat:p.coords.latitude, lon:p.coords.longitude } }
-          save(); resolve()
+        (pos) => {
+          const v: GeoState = { status: "granted", coords: { lat: pos.coords.latitude, lon: pos.coords.longitude } }
+          setGeo(v); resolve(v)
         },
-        _err => { geo = { status:"denied" }; save(); resolve() },
-        { enableHighAccuracy:false, timeout:8000, maximumAge:60_000 }
+        () => { const v = { status: "denied" as const }; setGeo(v); resolve(v) },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60_000 }
       )
     })
-  }
 
-  return [geo, request]
+  return { geo, request }
 }

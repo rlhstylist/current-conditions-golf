@@ -1,84 +1,62 @@
 ﻿export type Weather = {
-  windSpeed: number|null
-  windGust: number|null
-  windDir: number|null
-  tempC: number|null
-  feelsC: number|null
-  humidity: number|null
-  uv: number|null
-  cloud: number|null
-  precipNext1hMm: number|null
-  precipNext3hMm: number|null
-  precip24hMm: number|null
-  nextHour: {
-    tempC: number|null
-    feelsC: number|null
-    humidity: number|null
-    uv: number|null
-    cloud: number|null
-  }
+  windSpeed: number
+  windGust: number
+  windDir: number
+  temp: number
+  feels: number
+  humidity: number
+  uv: number
+  cloud: number
+  precip1h: number
+  precip3h: number
+  precip24h: number
 }
 
-export async function fetchWeather(lat:number, lon:number): Promise<Weather>{
-  const params = new URLSearchParams({
-    latitude: String(lat),
-    longitude: String(lon),
-    timezone: "auto",
-    current: [
-      "temperature_2m",
-      "apparent_temperature",
-      "relative_humidity_2m",
-      "wind_speed_10m",
-      "wind_gusts_10m",
-      "wind_direction_10m",
-      "uv_index",
-      "cloud_cover"
-    ].join(","),
-    hourly: [
-      "temperature_2m",
-      "apparent_temperature",
-      "relative_humidity_2m",
-      "uv_index",
-      "cloud_cover",
-      "precipitation"
-    ].join(",")
-  })
-  const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`
-  const res = await fetch(url)
-  if (!res.ok) throw new Error("Open-Meteo error")
+function sum(arr: number[], n: number) {
+  return arr.slice(0, n).reduce((a, b) => a + (b ?? 0), 0)
+}
+
+export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
+  const url = new URL("https://api.open-meteo.com/v1/forecast")
+  url.searchParams.set("latitude", String(lat))
+  url.searchParams.set("longitude", String(lon))
+  url.searchParams.set("current", [
+    "temperature_2m",
+    "apparent_temperature",
+    "relative_humidity_2m",
+    "wind_speed_10m",
+    "wind_gusts_10m",
+    "wind_direction_10m",
+    "uv_index",
+    "cloud_cover",
+  ].join(","))
+  url.searchParams.set("hourly", "precipitation")
+  url.searchParams.set("precipitation_unit", "mm")
+  url.searchParams.set("timezone", "auto")
+
+  const res = await fetch(url.toString())
+  if (!res.ok) throw new Error(`open-meteo ${res.status}`)
   const j = await res.json()
 
-  const nowIso = j.current?.time ?? j.hourly?.time?.[0]
-  const times: string[] = j.hourly?.time ?? []
-  const idx = Math.max(0, times.indexOf(nowIso))
-  const nextIdx = Math.min(idx+1, times.length-1)
+  const cur = j.current
+  const hourly: number[] = (j.hourly?.precipitation ?? []).map((x: unknown) => Number(x) || 0)
 
-  const sum = (arr:number[], start:number, count:number) => {
-    let s = 0
-    for (let i=0; i<count && (start+i)<arr.length; i++) s += Number(arr[start+i] ?? 0)
-    return s
-  }
-
-  const hPrecip: number[] = j.hourly?.precipitation ?? []
+  // Next windows starting "now" (best-effort; open-meteo returns future hours)
+  const precip1h = sum(hourly, 1)
+  const precip3h = sum(hourly, 3)
+  const precip24h = sum(hourly, 24)
 
   return {
-    windSpeed: j.current?.wind_speed_10m ?? null,
-    windGust: j.current?.wind_gusts_10m ?? null,
-    windDir: j.current?.wind_direction_10m ?? null,
-    tempC: j.current?.temperature_2m ?? null,
-    feelsC: j.current?.apparent_temperature ?? null,
-    humidity: j.current?.relative_humidity_2m ?? null,
-    uv: j.current?.uv_index ?? null,
-    cloud: j.current?.cloud_cover ?? null,
-    precipNext1hMm: sum(hPrecip, idx+1, 1),
-    precipNext3hMm: sum(hPrecip, idx+1, 3),
-    precip24hMm: sum(hPrecip, idx+1, 24),
-    nextHour: {
-      tempC: j.hourly?.temperature_2m?.[nextIdx] ?? null,
-      feelsC: j.hourly?.apparent_temperature?.[nextIdx] ?? null,
-      humidity: j.hourly?.relative_humidity_2m?.[nextIdx] ?? null,
-      uv: j.hourly?.uv_index?.[nextIdx] ?? null,
-      cloud: j.hourly?.cloud_cover?.[nextIdx] ?? null,
-    }
+    windSpeed: Number(cur?.wind_speed_10m ?? 0),
+    windGust:  Number(cur?.wind_gusts_10m ?? 0),
+    windDir:   Number(cur?.wind_direction_10m ?? 0),
+    temp:      Number(cur?.temperature_2m ?? 0),
+    feels:     Number(cur?.apparent_temperature ?? 0),
+    humidity:  Number(cur?.relative_humidity_2m ?? 0),
+    uv:        Number(cur?.uv_index ?? 0),
+    cloud:     Number(cur?.cloud_cover ?? 0),
+    precip1h,
+    precip3h,
+    precip24h,
   }
 }
