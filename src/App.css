@@ -58,3 +58,27 @@
   border: var(--border);
   text-align: center;
 }
+/* --- modal --- */
+.modalOverlay {
+  position: fixed; inset: 0;
+  background: rgba(2,6,23,.6);
+  display: grid; place-items: center;
+  z-index: 50;
+}
+.modal {
+  width: min(520px, 92vw);
+  padding: 14px;
+}
+.modalTitle {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.modalBody { display: grid; gap: 10px; }
+.input, .btn {
+  font: inherit; color: var(--ink); background: transparent;
+  border: var(--border); border-radius: var(--radius);
+  padding: 8px 10px;
+}
+.btn { cursor: pointer; }
+.btn.primary { border-color: rgba(56,189,248,.5); }
+.inline { display: flex; gap: 8px; align-items: center; }

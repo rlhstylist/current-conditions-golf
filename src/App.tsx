@@ -1,20 +1,68 @@
 ﻿import "./App.css"
+import { useEffect, useMemo, useState } from "react"
+import Modal from "./components/Modal"
+import { getPrefs, setPrefs } from "./lib/storage"
+import { useGeo } from "./hooks/useGeo"
 
 export default function App() {
+  const prefs = useMemo(() => getPrefs(), [])
+  const [courseName, setCourseName] = useState<string>(prefs.courseName ?? "")
+  const [manual, setManual] = useState<boolean>(prefs.manualCourse ?? false)
+
+  // Geolocation
+  const geo = useGeo({ timeoutMs: 7000 })
+
+  // Show modal when user denied OR when we have no course yet and geo is not granted
+  const needModal = (geo.status === "denied" || geo.status === "error" || geo.status === "prompt") && (!courseName || manual)
+
+  // Persist when these change
+  useEffect(() => {
+    setPrefs({ courseName, manualCourse: manual })
+  }, [courseName, manual])
+
+  // If geo granted and we have coords but no manual course, show a generic placeholder course label
+  useEffect(() => {
+    if (geo.status === "granted" && geo.coords && !manual) {
+      // (#6 will replace this with Overpass lookup)
+      setCourseName("Nearest course (auto)")
+    }
+  }, [geo.status, geo.coords, manual])
+
+  // Modal fields
+  const [query, setQuery] = useState("")
+
+  function useThisCourse() {
+    const name = query.trim() || "Custom course"
+    setCourseName(name)
+    setManual(true)
+  }
+
+  function clearManual() {
+    setManual(false)
+    // Trigger geo request again to try automatic
+    geo.request()
+  }
+
   return (
     <div className="app">
       {/* Top bar */}
       <div className="topbar panel">
         <div>
           <span className="brand small">CURRENT CONDITIONS</span><br />
-          <span className="course">Nearest course • <span className="small">approx.</span></span>
+          <span className="course">
+            {courseName ? courseName : "Finding course…"}
+            <span className="small"> {manual ? "(manual)" : "(auto)"}</span>
+          </span>
         </div>
-        <div className="toggle small">Units: IMP ▸ MET</div>
+        <div className="inline">
+          <button className="btn small" onClick={() => geo.request()}>Enable GPS</button>
+          <button className="btn small" onClick={() => { setManual(true) }}>Set course</button>
+          <div className="toggle small">Units: IMP ▸ MET</div>
+        </div>
       </div>
 
-      {/* Main grid */}
+      {/* Main grid (from Issue #4) */}
       <div className="grid">
-        {/* Wind primary tile */}
         <div className="wind panel">
           <div>
             <div className="speed">12<span className="small"> mph</span></div>
@@ -23,7 +71,6 @@ export default function App() {
           <div className="arrow" aria-label="wind direction (approx)"/>
         </div>
 
-        {/* Row of compact tiles */}
         <div className="tiles">
           <div className="tile panel">
             <div className="value">72°</div>
@@ -40,12 +87,33 @@ export default function App() {
         </div>
       </div>
 
-      {/* Precip chips (bottom) */}
       <div className="chips">
         <div className="chip panel small">24h: 0.12"</div>
         <div className="chip panel small">Next 1h: 0.00"</div>
         <div className="chip panel small">Next 3h: 0.05"</div>
       </div>
+
+      {/* Deny-case / first-run modal */}
+      <Modal
+        open={needModal}
+        onClose={() => {/* keep open until user picks or GPS granted */}}
+        title="Location permission denied (or unavailable)"
+      >
+        <div className="small">
+          You can set a course manually. Later, re-enable GPS to switch back to automatic.
+        </div>
+        <input
+          data-autofocus
+          className="input"
+          placeholder="Search or type course name…"
+          value={query}
+          onChange={(e) => setQuery((e.target as HTMLInputElement).value)}
+        />
+        <div className="inline">
+          <button className="btn primary" onClick={useThisCourse}>Use this course</button>
+          <button className="btn" onClick={clearManual}>Try GPS again</button>
+        </div>
+      </Modal>
     </div>
   )
 }
