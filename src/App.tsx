@@ -1,35 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+﻿import "./App.css"
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="app">
+      {/* Top bar */}
+      <div className="topbar panel">
+        <div>
+          <span className="brand small">CURRENT CONDITIONS</span><br />
+          <span className="course">Nearest course • <span className="small">approx.</span></span>
+        </div>
+        <div className="toggle small">Units: IMP ▸ MET</div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+
+      {/* Main grid */}
+      <div className="grid">
+        {/* Wind primary tile */}
+        <div className="wind panel">
+          <div>
+            <div className="speed">12<span className="small"> mph</span></div>
+            <div className="gust small">gust 18</div>
+          </div>
+          <div className="arrow" aria-label="wind direction (approx)"/>
+        </div>
+
+        {/* Row of compact tiles */}
+        <div className="tiles">
+          <div className="tile panel">
+            <div className="value">72°</div>
+            <div className="label">Temp / Feels</div>
+          </div>
+          <div className="tile panel">
+            <div className="value">58%</div>
+            <div className="label">Humidity</div>
+          </div>
+          <div className="tile panel">
+            <div className="value">6 / 40%</div>
+            <div className="label">UV / Cloud</div>
+          </div>
+        </div>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+
+      {/* Precip chips (bottom) */}
+      <div className="chips">
+        <div className="chip panel small">24h: 0.12"</div>
+        <div className="chip panel small">Next 1h: 0.00"</div>
+        <div className="chip panel small">Next 3h: 0.05"</div>
+      </div>
+    </div>
   )
 }
-
-export default App
