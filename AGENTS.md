@@ -1,4 +1,4 @@
-﻿# Agent Guide
+# Agent Guide
 
 - Work directly on `main`. Create a feature branch only if a fast-forward merge isn’t possible.
 - After each issue is completed:
