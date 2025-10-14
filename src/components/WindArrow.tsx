@@ -1,6 +1,4 @@
-﻿import React from "react"
-
-export function WindArrow({ deg, label }: { deg: number; label?: string }) {
+﻿export function WindArrow({ deg, label }: { deg: number; label?: string }) {
   const rot = `rotate(${deg}deg)`
   return (
     <div className="arrow" title={label ?? `Wind ${Math.round(deg)}°`}>
@@ -17,3 +15,4 @@ export function WindArrow({ deg, label }: { deg: number; label?: string }) {
     </div>
   )
 }
+
