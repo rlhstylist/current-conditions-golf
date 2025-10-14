@@ -1,4 +1,4 @@
-﻿import { ReactNode } from "react"
+﻿import type { ReactNode } from "react"
 
 export default function Modal({ open, onClose, children }:{
   open:boolean; onClose:()=>void; children: ReactNode
@@ -15,3 +15,4 @@ export default function Modal({ open, onClose, children }:{
     </div>
   )
 }
+

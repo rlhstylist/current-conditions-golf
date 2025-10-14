@@ -1,10 +1,11 @@
-﻿import { useEffect, useMemo, useState } from "react"
+﻿import { useEffect, useState } from "react"
 import "./index.css"
 import Modal from "./components/Modal"
 import { useGeo } from "./hooks/useGeo"
 import { loadCourse, saveCourse, pickNearest, searchByName } from "./hooks/useCourse"
 import { getWeather } from "./hooks/useWeather"
-import { Units, formatSpeed, formatTemp, formatDir, formatPrecip } from "./utils/units"
+import { formatSpeed, formatTemp, formatDir, formatPrecip } from "./utils/units"
+import type { Units } from "./utils/units"
 
 type Course = { name:string; lat:number; lon:number }
 
@@ -151,7 +152,7 @@ export default function App(){
             value={q}
             onChange={e=>setQ((e.target as HTMLInputElement).value)}
             placeholder="Course name (optionally city/state)"
-            style="background:#0f0f0f;border:1px solid #2a2a2a;color:#e6e6e6;border-radius:8px;padding:8px"
+            style={{ background:"#0f0f0f", border:"1px solid #2a2a2a", color:"#e6e6e6", borderRadius:"8px", padding:"8px" }}
           />
           <div style={{display:"flex", gap:8}}>
             <button className="btn" onClick={runSearch}>Search</button>
@@ -170,3 +171,4 @@ export default function App(){
     </div>
   )
 }
+
