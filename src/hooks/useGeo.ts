@@ -1,86 +1,35 @@
-﻿import { useCallback, useEffect, useRef, useState } from "react"
+﻿type GeoStatus = "idle"|"prompt"|"granted"|"denied"
+export type Geo = { status: GeoStatus; coords?: {lat:number, lon:number} }
 
-export type GeoStatus = "idle" | "prompt" | "granted" | "denied" | "error"
-export type GeoCoords = { lat: number; lon: number } | null
+const KEY = "ccg_geo_cache_v1"
 
-type Options = {
-  timeoutMs?: number
-  maximumAgeMs?: number
-  enableHighAccuracy?: boolean
-}
+export function useGeo(): [Geo, ()=>void]{
+  // lazy state to avoid SSR mismatch
+  const s = (window.localStorage.getItem(KEY))
+  const init: Geo = s ? JSON.parse(s) : { status:"idle" }
+  let geo = init
 
-export function useGeo(options: Options = {}) {
-  const { timeoutMs = 8000, maximumAgeMs = 30_000, enableHighAccuracy = true } = options
-  const [status, setStatus] = useState<GeoStatus>("idle")
-  const [coords, setCoords] = useState<GeoCoords>(null)
-  const [err, setErr] = useState<string | null>(null)
-  const busy = useRef(false)
+  function save(){
+    localStorage.setItem(KEY, JSON.stringify(geo))
+  }
 
-  // Probe permission on mount (best-effort)
-  useEffect(() => {
-    let cancelled = false
-    async function probe() {
-      if (!("permissions" in navigator)) {
-        setStatus("prompt")
-        return
-      }
-      try {
-        const res: PermissionStatus = await ((navigator as any).permissions as any).query({ name: "geolocation" })
-        if (cancelled) return
-        if (res.state === "granted") setStatus("granted")
-        else if (res.state === "denied") setStatus("denied")
-        else setStatus("prompt")
-        res.onchange = () => {
-          if (cancelled) return
-          const s = (res.state as string)
-          setStatus(s === "granted" ? "granted" : s === "denied" ? "denied" : "prompt")
-        }
-      } catch {
-        setStatus("prompt")
-      }
+  async function request(){
+    if (!("geolocation" in navigator)){
+      geo = { status:"denied" }
+      save(); return
     }
-    probe()
-    return () => { cancelled = true }
-  }, [])
+    geo = { status:"prompt" }; save()
+    await new Promise<void>((resolve)=>{
+      navigator.geolocation.getCurrentPosition(
+        p => {
+          geo = { status:"granted", coords:{ lat:p.coords.latitude, lon:p.coords.longitude } }
+          save(); resolve()
+        },
+        _err => { geo = { status:"denied" }; save(); resolve() },
+        { enableHighAccuracy:false, timeout:8000, maximumAge:60_000 }
+      )
+    })
+  }
 
-  const request = useCallback(() => {
-    if (!("geolocation" in navigator)) {
-      setStatus("error")
-      setErr("Geolocation not supported")
-      return
-    }
-    if (busy.current) return
-    busy.current = true
-    setErr(null)
-
-    const timer = setTimeout(() => {
-      setStatus("error")
-      setErr("Timed out")
-      busy.current = false
-    }, timeoutMs)
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        clearTimeout(timer)
-        setCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude })
-        setStatus("granted")
-        busy.current = false
-      },
-      (e) => {
-        clearTimeout(timer)
-        const code = e.code
-        if (code === e.PERMISSION_DENIED) setStatus("denied")
-        else setStatus("error")
-        setErr(e.message)
-        busy.current = false
-      },
-      {
-        enableHighAccuracy,
-        timeout: timeoutMs,
-        maximumAge: maximumAgeMs,
-      }
-    )
-  }, [enableHighAccuracy, maximumAgeMs, timeoutMs])
-
-  return { status, coords, err, request }
+  return [geo, request]
 }
