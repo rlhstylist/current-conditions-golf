@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react"
 import Modal from "./components/Modal"
 import { getPrefs, setPrefs } from "./lib/storage"
+import { findNearestCourse } from "./lib/overpass"
 import { useGeo } from "./hooks/useGeo"
 
 export default function App() {
@@ -117,3 +118,4 @@ export default function App() {
     </div>
   )
 }
+
