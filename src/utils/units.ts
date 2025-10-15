@@ -16,7 +16,7 @@ export function formatDir(deg: number) {
 }
 
 export function formatPrecip(mm: number, u: Units) {
-  return u === "imperial" ? `${(mm / 25.4).toFixed(2)} in` : `${mm.toFixed(1)} mm`
+  return u === "imperial" ? `${(mm / 25.4).toFixed(2)}"` : `${mm.toFixed(1)} mm`
 }
 
 export function formatPercent(value: number) {
