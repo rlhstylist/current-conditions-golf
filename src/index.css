@@ -212,8 +212,15 @@ main {
   line-height: 1.05;
 }
 
-.uv-card .big {
-  font-size: 30px;
+
+.uv-card,
+.humidity-card {
+  justify-content: space-between;
+}
+
+.uv-card .big,
+.humidity-card .big {
+  font-size: 28px;
 }
 
 .precip-card {

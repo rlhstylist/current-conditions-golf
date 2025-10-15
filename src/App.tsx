@@ -3,6 +3,7 @@ import "./index.css"
 import { useGeo } from "./hooks/useGeo"
 import { loadCourse, pickNearest } from "./hooks/useCourse"
 import type { CourseState } from "./hooks/useCourse"
+import { useHeading } from "./hooks/useHeading"
 import WindArrow from "./components/WindArrow"
 import type { Course } from "./lib/overpass"
 import { fetchWeather, type Weather } from "./lib/openmeteo"
@@ -26,6 +27,7 @@ export default function App() {
   const [courseLoading, setCourseLoading] = useState(false)
   const [courseError, setCourseError] = useState<string | null>(null)
   const lastFetchId = useRef(0)
+  const heading = useHeading()
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -124,6 +126,10 @@ export default function App() {
   const windDir = wx?.windDir ?? 0
   const windCardinal = formatDir(windDir)
   const windDegrees = Math.round(windDir)
+  const windRelative = useMemo(() => {
+    if (heading == null) return windDir
+    return windDir - heading
+  }, [heading, windDir])
   const updatedDisplay = useMemo(() => {
     if (!updatedAt) return "—"
     return updatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
@@ -191,7 +197,7 @@ export default function App() {
               <p className="h2">Wind</p>
               <div className="row wind-main">
                 <WindArrow
-                  degrees={windDir}
+                  degrees={windRelative}
                   ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
                 />
                 <div className="big">{formatSpeed(wx.windSpeed, units)}</div>
@@ -199,14 +205,18 @@ export default function App() {
               <div className="small">Gust {formatSpeed(wx.windGust, units)} · {windCardinal}</div>
             </div>
             <div className="card temp-card">
-              <p className="h2">Temp / Feels</p>
+              <p className="h2">Temperature</p>
               <div className="huge">{formatTemp(wx.temp, units)}</div>
               <div className="small">Feels {formatTemp(wx.feels, units)}</div>
             </div>
-            <div className="card span2 uv-card">
+            <div className="card uv-card">
               <p className="h2">UV + Cloud</p>
               <div className="big">UV {wx.uv.toFixed(1)}</div>
               <div className="small">Cloud cover {wx.cloud.toFixed(0)}%</div>
+            </div>
+            <div className="card humidity-card">
+              <p className="h2">Humidity</p>
+              <div className="big">{wx.humidity.toFixed(0)}%</div>
             </div>
             <div className="card span2 precip-card">
               <p className="h2">Precip Summary</p>
