@@ -193,22 +193,24 @@ export default function App() {
         )}
         {wx && (
           <div className="grid">
-            <div className="card wind-card">
+            <div className="card wind-card span2">
               <div className="wind-heading">
                 <p className="h2">Wind</p>
                 <span className="small">{windCardinal} · {windDegrees}°</span>
               </div>
-              <div className="wind-arrow-wrap">
-                <WindArrow
-                  degrees={windRelative}
-                  size={160}
-                  className="wind-arrow"
-                  ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
-                />
-              </div>
-              <div className="wind-speed">
-                <div className="huge">{formatSpeed(wx.windSpeed, units)}</div>
-                <div className="small">Gust {formatSpeed(wx.windGust, units)}</div>
+              <div className="wind-hero">
+                <div className="wind-arrow-wrap">
+                  <WindArrow
+                    degrees={windRelative}
+                    size={260}
+                    className="wind-arrow"
+                    ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
+                  />
+                </div>
+                <div className="wind-speed">
+                  <div className="huge">{formatSpeed(wx.windSpeed, units)}</div>
+                  <div className="small">Gust {formatSpeed(wx.windGust, units)}</div>
+                </div>
               </div>
               {headingStatus === "idle" && (
                 <button
@@ -244,9 +246,10 @@ export default function App() {
                 </div>
               )}
             </div>
-            <div className="card temp-card">
-              <p className="h2">Temperature</p>
-              <div className="huge">{formatTemp(wx.temp, units)}</div>
+            <div className="card climate-card">
+              <p className="h2">Humidity + Temp</p>
+              <div className="big">{wx.humidity.toFixed(0)}%</div>
+              <div className="small">Temp {formatTemp(wx.temp, units)}</div>
               <div className="small">Feels {formatTemp(wx.feels, units)}</div>
             </div>
             <div className="card uv-card">
@@ -254,23 +257,21 @@ export default function App() {
               <div className="big">UV {wx.uv.toFixed(1)}</div>
               <div className="small">Cloud cover {wx.cloud.toFixed(0)}%</div>
             </div>
-            <div className="card humidity-card">
-              <p className="h2">Humidity</p>
-              <div className="big">{wx.humidity.toFixed(0)}%</div>
-            </div>
             <div className="card span2 precip-card">
               <p className="h2">Precip Summary</p>
-              <div className="precip-row">
-                <span className="small">Next 1h</span>
-                <span className="big">{formatPrecip(wx.precip1h, units)}</span>
-              </div>
-              <div className="precip-row">
-                <span className="small">Next 3h</span>
-                <span className="big">{formatPrecip(wx.precip3h, units)}</span>
-              </div>
-              <div className="precip-row">
-                <span className="small">24h total</span>
-                <span className="big">{formatPrecip(wx.precip24h, units)}</span>
+              <div className="precip-grid">
+                <div className="precip-cell">
+                  <span className="small">Next 1h</span>
+                  <span className="medium">{formatPrecip(wx.precip1h, units)}</span>
+                </div>
+                <div className="precip-cell">
+                  <span className="small">Next 3h</span>
+                  <span className="medium">{formatPrecip(wx.precip3h, units)}</span>
+                </div>
+                <div className="precip-cell">
+                  <span className="small">24h total</span>
+                  <span className="medium">{formatPrecip(wx.precip24h, units)}</span>
+                </div>
               </div>
             </div>
           </div>
