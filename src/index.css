@@ -29,10 +29,10 @@ body {
   max-width: 390px;
   height: 100%;
   margin: 0 auto;
-  padding: 14px 10px 12px;
+  padding: 12px 10px 10px;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
-  gap: 10px;
+  gap: 8px;
 }
 
 .topbar {
@@ -68,7 +68,7 @@ body {
 
 .grid {
   display: grid;
-  grid-template-columns: 1.25fr 0.75fr;
+  grid-template-columns: 1.2fr 0.8fr;
   gap: 8px;
 }
 
@@ -95,7 +95,8 @@ body {
 
 .arrow svg {
   color: var(--accent);
-  transition: transform 0.12s linear;
+  transition: transform 0.1s linear;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.35));
 }
 
 .updated {
@@ -177,9 +178,10 @@ main {
 }
 
 .wind-card {
-  gap: 18px;
+  gap: 14px;
   align-items: stretch;
   text-align: center;
+  padding: 12px 14px 16px;
 }
 
 .wind-heading {
@@ -198,7 +200,7 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
 }
 
 .wind-arrow-wrap {
@@ -213,12 +215,12 @@ main {
 .wind-speed {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
 }
 
 .wind-speed .huge {
-  font-size: 46px;
+  font-size: 44px;
 }
 
 
@@ -240,8 +242,8 @@ main {
 
 .climate-main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
   align-items: end;
 }
 
@@ -252,7 +254,7 @@ main {
 }
 
 .climate-temp-value {
-  font-size: 46px;
+  font-size: 48px;
   line-height: 1;
 }
 
@@ -264,7 +266,7 @@ main {
 }
 
 .climate-humidity-value {
-  font-size: 26px;
+  font-size: 24px;
 }
 
 .uv-card {

@@ -1,3 +1,4 @@
+import { useId } from "react"
 import type { CSSProperties } from "react"
 
 export type WindArrowProps = {
@@ -22,6 +23,7 @@ export default function WindArrow({ degrees, size = 44, className, ariaLabel }: 
   const arrowStyle: CSSProperties = {
     transform: `rotate(${rotation}deg)`,
   }
+  const gradientId = useId()
 
   return (
     <span
@@ -38,10 +40,17 @@ export default function WindArrow({ degrees, size = 44, className, ariaLabel }: 
         aria-hidden="true"
         focusable="false"
       >
-        <g fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="miter" strokeLinecap="square">
-          <path d="M12 3l6 7h-4v11h-4V10H6l6-7z" fill="currentColor" />
-          <path d="M12 3v18" />
-          <path d="M8.5 12.5l3.5-4 3.5 4" />
+        <defs>
+          <linearGradient id={gradientId} x1="0%" x2="0%" y1="0%" y2="100%">
+            <stop offset="0%" stopColor="currentColor" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0.45" />
+          </linearGradient>
+        </defs>
+        <g stroke="currentColor" strokeLinejoin="bevel" strokeWidth="1.2">
+          <path d="M12 1.6L22 12h-5v10.6H7V12H2z" fill={`url(#${gradientId})`} />
+          <path d="M12 1.6L2 12h5v10.6h3.2V8.8z" fill="#ffffff" fillOpacity="0.18" stroke="none" />
+          <path d="M12 1.6l10 10.4h-4.5v10.6H13V7.4z" fill="#000000" fillOpacity="0.28" stroke="none" />
+          <path d="M11.1 14.4h1.8v8.2h-1.8z" fill="#000000" fillOpacity="0.4" />
         </g>
       </svg>
     </span>

@@ -118,9 +118,9 @@ export default function App() {
   const statusLabel = useMemo(() => {
     if (geo.status !== "granted") return "Location permission required"
     if (courseLoading) return "Locating course…"
+    if (course?.name) return ""
     if (courseError) return courseError
-    if (!course?.name) return "Course lookup pending"
-    return ""
+    return "Course lookup pending"
   }, [geo.status, courseLoading, course?.name, courseError])
 
   const windDir = wx?.windDir ?? 0
@@ -196,7 +196,7 @@ export default function App() {
                 <div className="wind-arrow-wrap">
                   <WindArrow
                     degrees={windRelative}
-                    size={300}
+                    size={240}
                     className="wind-arrow"
                     ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
                   />
