@@ -32,6 +32,7 @@ export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
   ].join(","))
   url.searchParams.set("hourly", "precipitation")
   url.searchParams.set("precipitation_unit", "mm")
+  url.searchParams.set("wind_speed_unit", "ms")
   url.searchParams.set("timezone", "auto")
 
   const res = await fetch(url.toString())

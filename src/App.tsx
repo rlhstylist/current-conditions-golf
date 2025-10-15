@@ -27,7 +27,7 @@ export default function App() {
   const [courseLoading, setCourseLoading] = useState(false)
   const [courseError, setCourseError] = useState<string | null>(null)
   const lastFetchId = useRef(0)
-  const heading = useHeading()
+  const { heading, status: headingStatus, request: requestHeading } = useHeading()
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -127,9 +127,9 @@ export default function App() {
   const windCardinal = formatDir(windDir)
   const windDegrees = Math.round(windDir)
   const windRelative = useMemo(() => {
-    if (heading == null) return windDir
+    if (headingStatus !== "granted" || heading == null) return windDir
     return windDir - heading
-  }, [heading, windDir])
+  }, [heading, headingStatus, windDir])
   const updatedDisplay = useMemo(() => {
     if (!updatedAt) return "—"
     return updatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
@@ -194,15 +194,55 @@ export default function App() {
         {wx && (
           <div className="grid">
             <div className="card wind-card">
-              <p className="h2">Wind</p>
-              <div className="row wind-main">
+              <div className="wind-heading">
+                <p className="h2">Wind</p>
+                <span className="small">{windCardinal} · {windDegrees}°</span>
+              </div>
+              <div className="wind-arrow-wrap">
                 <WindArrow
                   degrees={windRelative}
+                  size={160}
+                  className="wind-arrow"
                   ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
                 />
-                <div className="big">{formatSpeed(wx.windSpeed, units)}</div>
               </div>
-              <div className="small">Gust {formatSpeed(wx.windGust, units)} · {windCardinal}</div>
+              <div className="wind-speed">
+                <div className="huge">{formatSpeed(wx.windSpeed, units)}</div>
+                <div className="small">Gust {formatSpeed(wx.windGust, units)}</div>
+              </div>
+              {headingStatus === "idle" && (
+                <button
+                  type="button"
+                  className="btn compass-btn"
+                  onClick={requestHeading}
+                  aria-label="Enable compass access for wind arrow"
+                >
+                  Enable compass
+                </button>
+              )}
+              {headingStatus === "pending" && (
+                <div className="small muted" aria-live="polite">
+                  Waiting for compass permission…
+                </div>
+              )}
+              {headingStatus === "denied" && (
+                <div className="compass-retry" aria-live="polite">
+                  <div className="small muted">Compass access denied</div>
+                  <button
+                    type="button"
+                    className="btn compass-btn"
+                    onClick={requestHeading}
+                    aria-label="Retry enabling compass access"
+                  >
+                    Try again
+                  </button>
+                </div>
+              )}
+              {headingStatus === "unsupported" && (
+                <div className="small muted" aria-live="polite">
+                  Compass not supported on this device
+                </div>
+              )}
             </div>
             <div className="card temp-card">
               <p className="h2">Temperature</p>

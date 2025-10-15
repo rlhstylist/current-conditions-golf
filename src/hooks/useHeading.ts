@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 type MaybeHeading = number | null
 
@@ -12,13 +12,31 @@ function normalize(deg: number): number {
   return wrapped < 0 ? wrapped + 360 : wrapped
 }
 
-export function useHeading(): MaybeHeading {
+export type HeadingStatus = "idle" | "pending" | "granted" | "denied" | "unsupported"
+
+export type HeadingState = {
+  heading: MaybeHeading
+  status: HeadingStatus
+  request: () => void
+}
+
+export function useHeading(): HeadingState {
   const [heading, setHeading] = useState<MaybeHeading>(null)
+  const [status, setStatus] = useState<HeadingStatus>("unsupported")
+  const requestRef = useRef<() => void>(() => {})
 
   useEffect(() => {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined") {
+      setStatus("unsupported")
+      return
+    }
+
     const DeviceOrientation = window.DeviceOrientationEvent
-    if (typeof DeviceOrientation === "undefined") return
+
+    if (typeof DeviceOrientation === "undefined") {
+      setStatus("unsupported")
+      return
+    }
 
     let subscribed = false
 
@@ -51,33 +69,50 @@ export function useHeading(): MaybeHeading {
       subscribed = false
     }
 
-    const maybeRequestPermission = () => {
-      const requestPermission = (DeviceOrientation as typeof DeviceOrientationEvent & {
+    const requestPermission = () => {
+      const maybePermission = (DeviceOrientation as typeof DeviceOrientationEvent & {
         requestPermission?: () => Promise<PermissionState>
       }).requestPermission
 
-      if (typeof requestPermission === "function") {
-        requestPermission()
+      if (typeof maybePermission === "function") {
+        setStatus("pending")
+        maybePermission()
           .then((response) => {
             if (response === "granted") {
               subscribe()
+              setStatus("granted")
+            } else {
+              setStatus("denied")
             }
           })
           .catch(() => {
-            // If the promise rejects, attempt to subscribe anyway for non-iOS browsers
-            subscribe()
+            setStatus("denied")
           })
       } else {
         subscribe()
+        setStatus("granted")
       }
     }
 
-    maybeRequestPermission()
+    requestRef.current = requestPermission
+
+    if (typeof (DeviceOrientation as typeof DeviceOrientationEvent & {
+      requestPermission?: () => Promise<PermissionState>
+    }).requestPermission !== "function") {
+      subscribe()
+      setStatus("granted")
+    } else {
+      setStatus("idle")
+    }
 
     return () => {
       unsubscribe()
     }
   }, [])
 
-  return heading
+  const request = useCallback(() => {
+    requestRef.current()
+  }, [])
+
+  return { heading, status, request }
 }
