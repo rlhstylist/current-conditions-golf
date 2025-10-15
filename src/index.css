@@ -59,3 +59,104 @@ body {
 .small { font-size: 12px; color: var(--muted); }
 hr { border: none; border-top: 1px dashed var(--line); margin: 10px 0; }
 .center { text-align:center; }
+.flippable {
+  cursor: pointer;
+  height: 100%;
+  perspective: 1200px;
+  outline: none;
+}
+.flippable:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 3px;
+}
+.flippable-inner {
+  position: relative;
+  display: grid;
+  min-height: 150px;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.flippable.is-flipped .flippable-inner {
+  transform: rotateY(180deg);
+}
+.flippable-face {
+  grid-area: 1 / 1 / 2 / 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  backface-visibility: hidden;
+}
+.flippable-front { transform: rotateY(0deg); }
+.flippable-back { transform: rotateY(180deg); }
+.flippable.is-flipped .flippable-front { pointer-events: none; }
+.flippable:not(.is-flipped) .flippable-back { pointer-events: none; }
+.flip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.flip-btn {
+  background: none;
+  border: 1px dashed transparent;
+  color: var(--muted);
+  font: inherit;
+  padding: 2px 4px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: inherit;
+}
+.flip-btn:hover,
+.flip-btn:focus-visible {
+  border-color: var(--muted);
+  color: var(--text);
+  outline: none;
+}
+.flip-hint {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.trend-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.trend-table th,
+.trend-table td {
+  text-align: left;
+  padding: 2px 0;
+}
+.trend-table thead tr {
+  color: var(--muted);
+}
+.trend-table tbody tr:not(:last-child) td {
+  border-bottom: 1px dashed var(--line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flippable-inner {
+    transition: none;
+    transform: none !important;
+  }
+  .flippable-face {
+    transform: none !important;
+    backface-visibility: visible;
+  }
+  .flippable:not(.is-flipped) .flippable-back {
+    display: none;
+  }
+  .flippable.is-flipped .flippable-front {
+    display: none;
+  }
+}

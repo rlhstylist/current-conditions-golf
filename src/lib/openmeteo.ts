@@ -1,4 +1,18 @@
-﻿export type Weather = {
+export type ForecastSlice = {
+  hours: string[]
+  windSpeed: number[]
+  windGust: number[]
+  windDir: number[]
+  temp: number[]
+  feels: number[]
+  humidity: number[]
+  uv: number[]
+  cloud: number[]
+  precip: number[]
+  precipProb: number[]
+}
+
+export type Weather = {
   windSpeed: number
   windGust: number
   windDir: number
@@ -10,10 +24,17 @@
   precip1h: number
   precip3h: number
   precip24h: number
+  forecast: ForecastSlice
 }
 
 function sum(arr: number[], n: number) {
   return arr.slice(0, n).reduce((a, b) => a + (b ?? 0), 0)
+}
+
+const FORECAST_HOURS = 6
+
+function toNumbers(arr: unknown[]): number[] {
+  return arr.map((x) => Number(x) || 0)
 }
 
 export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
@@ -30,7 +51,18 @@ export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
     "uv_index",
     "cloud_cover",
   ].join(","))
-  url.searchParams.set("hourly", "precipitation")
+  url.searchParams.set("hourly", [
+    "temperature_2m",
+    "apparent_temperature",
+    "relative_humidity_2m",
+    "wind_speed_10m",
+    "wind_gusts_10m",
+    "wind_direction_10m",
+    "uv_index",
+    "cloud_cover",
+    "precipitation_probability",
+    "precipitation",
+  ].join(","))
   url.searchParams.set("precipitation_unit", "mm")
   url.searchParams.set("timezone", "auto")
 
@@ -39,12 +71,28 @@ export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
   const j = await res.json()
 
   const cur = j.current
-  const hourly: number[] = (j.hourly?.precipitation ?? []).map((x: unknown) => Number(x) || 0)
+  const times: string[] = Array.isArray(j.hourly?.time) ? j.hourly.time : []
+  const hourlyPrecip: number[] = toNumbers(Array.isArray(j.hourly?.precipitation) ? j.hourly.precipitation : [])
+
+  const now = Date.now()
+  const startIndex = times.findIndex((iso) => {
+    const ts = Date.parse(String(iso))
+    return Number.isFinite(ts) && ts >= now - 30 * 60 * 1000
+  })
+  const normalizedIndex = startIndex === -1 ? 0 : startIndex
+
+  const slice = (values: unknown[] | undefined) => {
+    const arr = Array.isArray(values) ? values : []
+    return toNumbers(arr.slice(normalizedIndex, normalizedIndex + FORECAST_HOURS))
+  }
+
+  const hours = times.slice(normalizedIndex, normalizedIndex + FORECAST_HOURS)
 
   // Next windows starting "now" (best-effort; open-meteo returns future hours)
-  const precip1h = sum(hourly, 1)
-  const precip3h = sum(hourly, 3)
-  const precip24h = sum(hourly, 24)
+  const precipWindow = hourlyPrecip.slice(normalizedIndex)
+  const precip1h = sum(precipWindow, 1)
+  const precip3h = sum(precipWindow, 3)
+  const precip24h = sum(precipWindow, 24)
 
   return {
     windSpeed: Number(cur?.wind_speed_10m ?? 0),
@@ -58,5 +106,18 @@ export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
     precip1h,
     precip3h,
     precip24h,
+    forecast: {
+      hours,
+      windSpeed: slice(j.hourly?.wind_speed_10m),
+      windGust: slice(j.hourly?.wind_gusts_10m),
+      windDir: slice(j.hourly?.wind_direction_10m),
+      temp: slice(j.hourly?.temperature_2m),
+      feels: slice(j.hourly?.apparent_temperature),
+      humidity: slice(j.hourly?.relative_humidity_2m),
+      uv: slice(j.hourly?.uv_index),
+      cloud: slice(j.hourly?.cloud_cover),
+      precip: slice(j.hourly?.precipitation),
+      precipProb: slice(j.hourly?.precipitation_probability),
+    },
   }
 }
