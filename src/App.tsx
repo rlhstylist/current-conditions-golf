@@ -233,45 +233,53 @@ export default function App() {
                 </div>
               )}
             </div>
-            <div className="stat-row span2">
-              <section className="stat-block climate-block" aria-label="Temperature and humidity">
-                <p className="h2">Temperature</p>
-                <div className="stat-flex">
-                  <div className="stat-temp">
-                    <span className="stat-temp-value huge">{formatTemp(wx.temp, units)}</span>
-                    <span className="small">Feels {formatTemp(wx.feels, units)}</span>
-                  </div>
-                  <div className="stat-humidity">
-                    <span className="stat-humidity-value big">{wx.humidity.toFixed(0)}%</span>
-                    <span className="small">Humidity</span>
-                  </div>
+            <div className="metrics-grid span2">
+              <section className="card metric-card temperature-card" aria-label="Temperature and humidity">
+                <div className="metric-header">
+                  <p className="h2">Temperature</p>
+                  <span className="small">Feels {formatTemp(wx.feels, units)}</span>
                 </div>
+                <div className="metric-value">{formatTemp(wx.temp, units)}</div>
+                <dl className="metric-list">
+                  <div className="metric-item">
+                    <dt>Humidity</dt>
+                    <dd>{wx.humidity.toFixed(0)}%</dd>
+                  </div>
+                </dl>
               </section>
-              <section className="stat-block uv-block" aria-label="UV index and cloud cover">
-                <p className="h2">UV + Cloud</p>
-                <div className="stat-flex">
-                  <span className="stat-uv big">UV {wx.uv.toFixed(1)}</span>
-                  <span className="small">Cloud {wx.cloud.toFixed(0)}%</span>
+              <section className="card metric-card sky-card" aria-label="UV index and cloud cover">
+                <div className="metric-header">
+                  <p className="h2">UV + Cloud</p>
                 </div>
+                <dl className="metric-list">
+                  <div className="metric-item">
+                    <dt>UV index</dt>
+                    <dd>{wx.uv.toFixed(1)}</dd>
+                  </div>
+                  <div className="metric-item">
+                    <dt>Cloud cover</dt>
+                    <dd>{wx.cloud.toFixed(0)}%</dd>
+                  </div>
+                </dl>
               </section>
             </div>
-            <div className="card span2 precip-card">
+            <section className="card span2 precip-card" aria-label="Precipitation outlook">
               <p className="h2">Precip Summary</p>
-              <div className="precip-grid">
-                <div className="precip-cell">
-                  <span className="small">Next 1h chance</span>
-                  <span className="medium">{formatPercent(wx.precipChance1h)}</span>
+              <dl className="precip-list">
+                <div className="precip-item">
+                  <dt>Next 1h chance</dt>
+                  <dd>{formatPercent(wx.precipChance1h)}</dd>
                 </div>
-                <div className="precip-cell">
-                  <span className="small">Next 3h chance</span>
-                  <span className="medium">{formatPercent(wx.precipChance3h)}</span>
+                <div className="precip-item">
+                  <dt>Next 3h chance</dt>
+                  <dd>{formatPercent(wx.precipChance3h)}</dd>
                 </div>
-                <div className="precip-cell">
-                  <span className="small">24h total</span>
-                  <span className="medium">{formatPrecip(wx.precip24h, units)}</span>
+                <div className="precip-item">
+                  <dt>24h total</dt>
+                  <dd>{formatPrecip(wx.precip24h, units)}</dd>
                 </div>
-              </div>
-            </div>
+              </dl>
+            </section>
           </div>
         )}
       </main>
