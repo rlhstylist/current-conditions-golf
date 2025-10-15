@@ -19,7 +19,6 @@ export default function App() {
     return stored === "metric" || stored === "imperial" ? stored : "imperial"
   })
   const [wx, setWx] = useState<Weather | null>(null)
-  const [loading, setLoading] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null)
   const [course, setCourse] = useState<Course | null>(null)
@@ -76,7 +75,6 @@ export default function App() {
 
   const updateWeather = useCallback(async (lat: number, lon: number): Promise<void> => {
     const id = ++lastFetchId.current
-    setLoading(true)
     setErr(null)
     try {
       const data = await fetchWeather(lat, lon)
@@ -87,10 +85,6 @@ export default function App() {
       if (lastFetchId.current !== id) return
       const message = e instanceof Error ? e.message : "Weather unavailable"
       setErr(message)
-    } finally {
-      if (lastFetchId.current === id) {
-        setLoading(false)
-      }
     }
   }, [])
 
@@ -100,11 +94,6 @@ export default function App() {
   }, [targetLat, targetLon, updateWeather])
 
   const toggleUnits = () => setUnits((u) => (u === "imperial" ? "metric" : "imperial"))
-
-  const handleRefresh = () => {
-    if (typeof targetLat !== "number" || typeof targetLon !== "number") return
-    void updateWeather(targetLat, targetLon)
-  }
 
   const courseLabel = useMemo(() => {
     if (course?.name) return course.name
@@ -136,6 +125,9 @@ export default function App() {
   }, [updatedAt])
   const updatedDateTime = updatedAt?.toISOString()
 
+  const showLocationPrompt = geo.status !== "granted"
+  const showStatus = !course?.name && Boolean(statusLabel)
+
   return (
     <div className="wrapper">
       <header className="topbar">
@@ -150,33 +142,25 @@ export default function App() {
         </button>
       </header>
 
-      <div className="row controls">
-        {geo.status !== "granted" ? (
-          <button
-            className="btn"
-            type="button"
-            onClick={() => void request()}
-            aria-label="Enable location access"
-          >
-            Enable location
-          </button>
-        ) : (
-          <button
-            className="btn"
-            type="button"
-            onClick={handleRefresh}
-            disabled={loading}
-            aria-label="Refresh weather data"
-          >
-            {loading ? "Loading…" : "Refresh"}
-          </button>
-        )}
-        {statusLabel && (
-          <span className="small" aria-live="polite">
-            {statusLabel}
-          </span>
-        )}
-      </div>
+      {(showLocationPrompt || showStatus) && (
+        <div className="row controls">
+          {showLocationPrompt && (
+            <button
+              className="btn"
+              type="button"
+              onClick={() => void request()}
+              aria-label="Enable location access"
+            >
+              Enable location
+            </button>
+          )}
+          {showStatus && statusLabel && (
+            <span className="small" aria-live="polite">
+              {statusLabel}
+            </span>
+          )}
+        </div>
+      )}
 
       <main>
         {err && <div className="card small">Error: {err}</div>}
@@ -196,7 +180,7 @@ export default function App() {
                 <div className="wind-arrow-wrap">
                   <WindArrow
                     degrees={windRelative}
-                    size={240}
+                    size={200}
                     className="wind-arrow"
                     ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
                   />
@@ -240,23 +224,27 @@ export default function App() {
                 </div>
               )}
             </div>
-            <div className="card climate-card">
-              <p className="h2">Temp + Humidity</p>
-              <div className="climate-main">
-                <div className="climate-temp">
-                  <span className="climate-temp-value huge">{formatTemp(wx.temp, units)}</span>
-                  <span className="small">Feels {formatTemp(wx.feels, units)}</span>
+            <div className="stat-row span2">
+              <section className="stat-block climate-block" aria-label="Temperature and humidity">
+                <p className="h2">Temperature</p>
+                <div className="stat-flex">
+                  <div className="stat-temp">
+                    <span className="stat-temp-value huge">{formatTemp(wx.temp, units)}</span>
+                    <span className="small">Feels {formatTemp(wx.feels, units)}</span>
+                  </div>
+                  <div className="stat-humidity">
+                    <span className="stat-humidity-value big">{wx.humidity.toFixed(0)}%</span>
+                    <span className="small">Humidity</span>
+                  </div>
                 </div>
-                <div className="climate-humidity">
-                  <span className="climate-humidity-value big">{wx.humidity.toFixed(0)}%</span>
-                  <span className="small">Humidity</span>
+              </section>
+              <section className="stat-block uv-block" aria-label="UV index and cloud cover">
+                <p className="h2">UV + Cloud</p>
+                <div className="stat-flex">
+                  <span className="stat-uv big">UV {wx.uv.toFixed(1)}</span>
+                  <span className="small">Cloud {wx.cloud.toFixed(0)}%</span>
                 </div>
-              </div>
-            </div>
-            <div className="card uv-card">
-              <p className="h2">UV + Cloud</p>
-              <div className="big">UV {wx.uv.toFixed(1)}</div>
-              <div className="small">Cloud cover {wx.cloud.toFixed(0)}%</div>
+              </section>
             </div>
             <div className="card span2 precip-card">
               <p className="h2">Precip Summary</p>
