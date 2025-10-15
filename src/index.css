@@ -5,6 +5,7 @@
   --text: #e8e8e8;
   --muted: #a6a8ad;
   --accent: #cfcfcf;
+  --scale: 0.97;
 }
 
 * {
@@ -21,7 +22,9 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font: 14px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: calc(14px * var(--scale));
+  line-height: 1.3;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -29,17 +32,17 @@ body {
   max-width: 390px;
   height: 100%;
   margin: 0 auto;
-  padding: 16px 14px 14px;
+  padding: 15.5px 13.6px 13.6px;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
-  gap: 12px;
+  gap: 11.6px;
 }
 
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 9.7px;
 }
 
 .topbar .course {
@@ -51,7 +54,7 @@ body {
   background: var(--panel);
   color: var(--text);
   border: 1px solid var(--border);
-  padding: 5px 9px;
+  padding: 4.9px 8.7px;
   border-radius: 8px;
   cursor: pointer;
 }
@@ -73,7 +76,7 @@ body {
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 11.6px;
   align-content: start;
 }
 
@@ -81,10 +84,10 @@ body {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 10px 12px;
+  padding: 9.7px 11.6px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5.8px;
 }
 
 .span2 {
@@ -95,7 +98,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-right: 8px;
+  margin-right: 7.8px;
 }
 
 .arrow svg {
@@ -104,16 +107,16 @@ body {
 }
 
 .updated {
-  font-size: 11px;
+  font-size: calc(11px * var(--scale));
   color: var(--muted);
 }
 
 .huge {
-  font-size: 34px;
+  font-size: calc(34px * var(--scale));
 }
 
 .big {
-  font-size: 28px;
+  font-size: calc(28px * var(--scale));
 }
 
 .muted {
@@ -121,32 +124,32 @@ body {
 }
 
 .h1 {
-  font-size: 22px;
+  font-size: calc(22px * var(--scale));
   margin: 0;
 }
 
 .h2 {
-  font-size: 14px;
+  font-size: calc(14px * var(--scale));
   letter-spacing: 0.04em;
   color: var(--muted);
-  margin: 0 0 4px;
+  margin: 0 0 3.9px;
 }
 
 .row {
   display: flex;
-  gap: 8px;
+  gap: 7.8px;
   align-items: center;
 }
 
 .small {
-  font-size: 12px;
+  font-size: calc(12px * var(--scale));
   color: var(--muted);
 }
 
 hr {
   border: none;
   border-top: 1px dashed var(--border);
-  margin: 8px 0;
+  margin: 7.8px 0;
 }
 
 .center {
@@ -167,7 +170,7 @@ hr {
 main {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 15.5px;
 }
 
 .footer {
@@ -176,10 +179,10 @@ main {
 }
 
 .wind-card {
-  gap: 12px;
+  gap: 11.6px;
   align-items: stretch;
   text-align: center;
-  padding: 14px 14px 16px;
+  padding: 13.6px 13.6px 15.5px;
 }
 
 .wind-heading {
@@ -198,7 +201,7 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 11.6px;
 }
 
 .wind-arrow-wrap {
@@ -213,36 +216,36 @@ main {
 .wind-speed {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3.9px;
   align-items: center;
 }
 
 .wind-speed .huge {
-  font-size: 42px;
+  font-size: calc(42px * var(--scale));
 }
 
 .compass-btn {
   align-self: center;
-  padding-inline: 16px;
+  padding-inline: 15.5px;
 }
 
 .compass-retry {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7.8px;
   align-items: center;
 }
 
 
 .climate-card {
-  gap: 12px;
-  padding: 14px 12px;
+  gap: 11.6px;
+  padding: 13.6px 11.6px;
 }
 
 .climate-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: 12px;
+  gap: 11.6px;
   align-items: stretch;
 }
 
@@ -250,17 +253,17 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 12px;
+  gap: 11.6px;
 }
 
 .climate-line {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3.9px;
 }
 
 .climate-main {
-  font-size: 48px;
+  font-size: calc(48px * var(--scale));
   line-height: 1;
 }
 
@@ -268,14 +271,14 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 12px;
+  gap: 11.6px;
   height: 100%;
 }
 
 .climate-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3.9px;
 }
 
 .climate-item .small {
@@ -284,26 +287,26 @@ main {
 }
 
 .climate-value {
-  font-size: 28px;
+  font-size: calc(28px * var(--scale));
   line-height: 1;
 }
 
 
 .precip-card {
-  gap: 8px;
-  padding: 12px;
+  gap: 7.8px;
+  padding: 11.6px;
 }
 
 .precip-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 9.7px;
 }
 
 .precip-cell {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3.9px;
 }
 
 .precip-cell .h2 {
@@ -311,6 +314,6 @@ main {
 }
 
 .precip-value {
-  font-size: 26px;
+  font-size: calc(26px * var(--scale));
   line-height: 1;
 }
