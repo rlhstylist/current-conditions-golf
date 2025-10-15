@@ -118,9 +118,9 @@ export default function App() {
   const statusLabel = useMemo(() => {
     if (geo.status !== "granted") return "Location permission required"
     if (courseLoading) return "Locating course…"
-    if (course?.name) return `Nearest: ${course.name}`
     if (courseError) return courseError
-    return "Course lookup pending"
+    if (!course?.name) return "Course lookup pending"
+    return ""
   }, [geo.status, courseLoading, course?.name, courseError])
 
   const windDir = wx?.windDir ?? 0
@@ -139,25 +139,15 @@ export default function App() {
   return (
     <div className="wrapper">
       <header className="topbar">
-        <div className="stack">
-          <p className="brand h2">Current Conditions Golf</p>
-          <p className="course h1" aria-live="polite">{courseLabel}</p>
-        </div>
-        <div className="topbar-meta">
-          <span className="updated">
-            Updated
-            {" "}
-            <time dateTime={updatedDateTime}>{updatedDisplay}</time>
-          </span>
-          <button
-            className="btn"
-            type="button"
-            onClick={toggleUnits}
-            aria-label={units === "imperial" ? "Switch to metric units" : "Switch to imperial units"}
-          >
-            {units === "imperial" ? "°F · mph" : "°C · m/s"}
-          </button>
-        </div>
+        <p className="course h1" aria-live="polite">{courseLabel}</p>
+        <button
+          className="btn"
+          type="button"
+          onClick={toggleUnits}
+          aria-label={units === "imperial" ? "Switch to metric units" : "Switch to imperial units"}
+        >
+          {units === "imperial" ? "°F · mph" : "°C · m/s"}
+        </button>
       </header>
 
       <div className="row controls">
@@ -181,7 +171,11 @@ export default function App() {
             {loading ? "Loading…" : "Refresh"}
           </button>
         )}
-        <span className="small" aria-live="polite">{statusLabel}</span>
+        {statusLabel && (
+          <span className="small" aria-live="polite">
+            {statusLabel}
+          </span>
+        )}
       </div>
 
       <main>
@@ -202,7 +196,7 @@ export default function App() {
                 <div className="wind-arrow-wrap">
                   <WindArrow
                     degrees={windRelative}
-                    size={260}
+                    size={300}
                     className="wind-arrow"
                     ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
                   />
@@ -247,10 +241,17 @@ export default function App() {
               )}
             </div>
             <div className="card climate-card">
-              <p className="h2">Humidity + Temp</p>
-              <div className="big">{wx.humidity.toFixed(0)}%</div>
-              <div className="small">Temp {formatTemp(wx.temp, units)}</div>
-              <div className="small">Feels {formatTemp(wx.feels, units)}</div>
+              <p className="h2">Temp + Humidity</p>
+              <div className="climate-main">
+                <div className="climate-temp">
+                  <span className="climate-temp-value huge">{formatTemp(wx.temp, units)}</span>
+                  <span className="small">Feels {formatTemp(wx.feels, units)}</span>
+                </div>
+                <div className="climate-humidity">
+                  <span className="climate-humidity-value big">{wx.humidity.toFixed(0)}%</span>
+                  <span className="small">Humidity</span>
+                </div>
+              </div>
             </div>
             <div className="card uv-card">
               <p className="h2">UV + Cloud</p>

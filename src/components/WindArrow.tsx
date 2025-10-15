@@ -1,4 +1,3 @@
-import { useId } from "react"
 import type { CSSProperties } from "react"
 
 export type WindArrowProps = {
@@ -16,10 +15,6 @@ function normalize(deg: number) {
 
 export default function WindArrow({ degrees, size = 44, className, ariaLabel }: WindArrowProps) {
   const rotation = normalize(degrees)
-  const gradientId = useId()
-  const arrowGradientId = `${gradientId}-arrow`
-  const shaftGradientId = `${gradientId}-shaft`
-  const shadowId = `${gradientId}-shadow`
   const spanStyle: CSSProperties = {
     width: size,
     height: size,
@@ -35,46 +30,20 @@ export default function WindArrow({ degrees, size = 44, className, ariaLabel }: 
       aria-label={ariaLabel}
       style={spanStyle}
     >
-      <span className="arrow-tilt">
-        <svg
-          viewBox="0 0 24 24"
-          width={size * 0.62}
-          height={size * 0.62}
-          style={arrowStyle}
-          aria-hidden="true"
-          focusable="false"
-        >
-          <defs>
-            <linearGradient id={arrowGradientId} x1="12" y1="2" x2="12" y2="22" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#fafafa" />
-              <stop offset="45%" stopColor="#d7d9dd" />
-              <stop offset="100%" stopColor="#70747c" />
-            </linearGradient>
-            <linearGradient id={shaftGradientId} x1="12" y1="9" x2="12" y2="22" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#f0f0f0" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#3b3f46" stopOpacity="0.95" />
-            </linearGradient>
-            <filter id={shadowId} x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="10" stdDeviation="5" floodColor="rgba(0, 0, 0, 0.65)" />
-            </filter>
-          </defs>
-          <g filter={`url(#${shadowId})`}>
-            <path
-              d="M12 2l7.4 10.8h-4.4V22H9V12.8H4.6L12 2z"
-              fill={`url(#${arrowGradientId})`}
-            />
-            <path
-              d="M12 2l-5.6 8.1h3.2V22h2.8V10.1h4.1L12 2z"
-              fill={`url(#${shaftGradientId})`}
-              opacity="0.8"
-            />
-            <path
-              d="M12 2l5 7.3h-1.4L12 4.2 8.4 9.3H7L12 2z"
-              fill="rgba(255, 255, 255, 0.3)"
-            />
-          </g>
-        </svg>
-      </span>
+      <svg
+        viewBox="0 0 24 24"
+        width={size * 0.68}
+        height={size * 0.68}
+        style={arrowStyle}
+        aria-hidden="true"
+        focusable="false"
+      >
+        <g fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="miter" strokeLinecap="square">
+          <path d="M12 3l6 7h-4v11h-4V10H6l6-7z" fill="currentColor" />
+          <path d="M12 3v18" />
+          <path d="M8.5 12.5l3.5-4 3.5 4" />
+        </g>
+      </svg>
     </span>
   )
 }
