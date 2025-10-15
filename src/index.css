@@ -233,35 +233,35 @@ main {
   align-items: center;
 }
 
+
 .climate-card {
-  gap: 14px;
-  padding: 16px 14px;
+  gap: 12px;
+  padding: 14px 12px;
 }
 
 .climate-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  gap: 14px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 12px;
   align-items: stretch;
 }
 
 .climate-temp {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  justify-content: center;
+  gap: 12px;
 }
 
-.climate-temp .small {
-  margin-top: auto;
+.climate-line {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .climate-main {
-  font-size: 50px;
+  font-size: 48px;
   line-height: 1;
-}
-
-.climate-feels {
-  margin-top: -2px;
 }
 
 .climate-stack {
@@ -287,21 +287,22 @@ main {
   line-height: 1;
 }
 
+
 .precip-card {
-  gap: 10px;
-  padding: 14px;
+  gap: 8px;
+  padding: 12px;
 }
 
 .precip-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .precip-cell {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .precip-cell .h2 {
@@ -309,6 +310,6 @@ main {
 }
 
 .precip-value {
-  font-size: 30px;
+  font-size: 26px;
   line-height: 1;
 }

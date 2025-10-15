@@ -239,9 +239,14 @@ export default function App() {
             >
               <div className="climate-grid">
                 <div className="climate-temp">
-                  <p className="h2">Temperature</p>
-                  <div className="climate-main">{formatTemp(wx.temp, units)}</div>
-                  <div className="climate-main climate-feels">Feels {formatTemp(wx.feels, units)}</div>
+                  <div className="climate-line">
+                    <p className="small">Temperature</p>
+                    <div className="climate-main">{formatTemp(wx.temp, units)}</div>
+                  </div>
+                  <div className="climate-line">
+                    <p className="small">Feels</p>
+                    <div className="climate-main">{formatTemp(wx.feels, units)}</div>
+                  </div>
                 </div>
                 <div className="climate-stack">
                   <div className="climate-item">
