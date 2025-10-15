@@ -233,52 +233,48 @@ export default function App() {
                 </div>
               )}
             </div>
-            <div className="metrics-grid span2">
-              <section className="card metric-card temperature-card" aria-label="Temperature and humidity">
-                <div className="metric-header">
+            <section
+              className="card climate-card span2"
+              aria-label="Temperature, humidity, UV index, and cloud cover"
+            >
+              <div className="climate-grid">
+                <div className="climate-cell temp-cell">
                   <p className="h2">Temperature</p>
-                  <span className="small">Feels {formatTemp(wx.feels, units)}</span>
+                  <div className="climate-main">{formatTemp(wx.temp, units)}</div>
+                  <p className="small">Feels {formatTemp(wx.feels, units)}</p>
                 </div>
-                <div className="metric-value">{formatTemp(wx.temp, units)}</div>
-                <dl className="metric-list">
-                  <div className="metric-item">
-                    <dt>Humidity</dt>
-                    <dd>{wx.humidity.toFixed(0)}%</dd>
-                  </div>
-                </dl>
-              </section>
-              <section className="card metric-card sky-card" aria-label="UV index and cloud cover">
-                <div className="metric-header">
-                  <p className="h2">UV + Cloud</p>
+                <div className="climate-cell">
+                  <p className="h2">Humidity</p>
+                  <div className="climate-value">{wx.humidity.toFixed(0)}%</div>
                 </div>
-                <dl className="metric-list">
-                  <div className="metric-item">
-                    <dt>UV index</dt>
-                    <dd>{wx.uv.toFixed(1)}</dd>
-                  </div>
-                  <div className="metric-item">
-                    <dt>Cloud cover</dt>
-                    <dd>{wx.cloud.toFixed(0)}%</dd>
-                  </div>
-                </dl>
-              </section>
-            </div>
-            <section className="card span2 precip-card" aria-label="Precipitation outlook">
-              <p className="h2">Precip Summary</p>
-              <dl className="precip-list">
-                <div className="precip-item">
-                  <dt>Next 1h chance</dt>
-                  <dd>{formatPercent(wx.precipChance1h)}</dd>
+                <div className="climate-cell">
+                  <p className="h2">UV</p>
+                  <div className="climate-value">{wx.uv.toFixed(1)}</div>
                 </div>
-                <div className="precip-item">
-                  <dt>Next 3h chance</dt>
-                  <dd>{formatPercent(wx.precipChance3h)}</dd>
+                <div className="climate-cell">
+                  <p className="h2">Cloud</p>
+                  <div className="climate-value">{wx.cloud.toFixed(0)}%</div>
                 </div>
-                <div className="precip-item">
-                  <dt>24h total</dt>
-                  <dd>{formatPrecip(wx.precip24h, units)}</dd>
+              </div>
+            </section>
+            <section className="card precip-card span2" aria-label="Precipitation outlook">
+              <div className="precip-grid">
+                <div className="precip-cell">
+                  <p className="h2">Next 1h</p>
+                  <div className="precip-value">{formatPercent(wx.precipChance1h)}</div>
+                  <p className="small">Chance</p>
                 </div>
-              </dl>
+                <div className="precip-cell">
+                  <p className="h2">Next 3h</p>
+                  <div className="precip-value">{formatPercent(wx.precipChance3h)}</div>
+                  <p className="small">Chance</p>
+                </div>
+                <div className="precip-cell">
+                  <p className="h2">24h total</p>
+                  <div className="precip-value">{formatPrecip(wx.precip24h, units)}</div>
+                  <p className="small">Accumulation</p>
+                </div>
+              </div>
             </section>
           </div>
         )}
