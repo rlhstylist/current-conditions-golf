@@ -32,18 +32,16 @@ export default function WindArrow({ degrees, size = 44, className, ariaLabel }: 
     >
       <svg
         viewBox="0 0 48 48"
-        width={size * 0.7}
-        height={size * 0.7}
+        width={size * 0.72}
+        height={size * 0.72}
         style={arrowStyle}
         aria-hidden="true"
         focusable="false"
       >
-        <g stroke="currentColor" strokeWidth="2" strokeLinejoin="miter">
-          <path d="M24 4 40 20h-9v20H17V20H8z" fill="currentColor" />
-          <path d="M24 4 8 20h9v20h7V12z" fill="currentColor" fillOpacity="0.5" />
-          <path d="M24 4l16 16h-9v20h-7V12z" fill="currentColor" fillOpacity="0.25" />
-          <path d="M20 24h8v16h-8z" fill="currentColor" />
-        </g>
+        <path
+          d="M24 4 44 24H32v20H16V24H4z"
+          fill="currentColor"
+        />
       </svg>
     </span>
   )

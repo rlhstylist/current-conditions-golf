@@ -7,7 +7,7 @@ import { useHeading } from "./hooks/useHeading"
 import WindArrow from "./components/WindArrow"
 import type { Course } from "./lib/overpass"
 import { fetchWeather, type Weather } from "./lib/openmeteo"
-import { formatDir, formatPrecip, formatSpeed, formatTemp, type Units } from "./utils/units"
+import { formatDir, formatPercent, formatPrecip, formatSpeed, formatTemp, type Units } from "./utils/units"
 
 const UNITS_KEY = "ccg_units_v1"
 
@@ -104,6 +104,13 @@ export default function App() {
     return "Nearest course unavailable"
   }, [course?.name, courseLoading, courseError, geo.status])
 
+  const courseStyle = useMemo(() => {
+    const length = courseLabel.length
+    if (length <= 24) return undefined
+    const size = Math.max(14, 22 - (length - 24) * 0.4)
+    return { fontSize: `${size}px` }
+  }, [courseLabel])
+
   const statusLabel = useMemo(() => {
     if (geo.status !== "granted") return "Location permission required"
     if (courseLoading) return "Locating course…"
@@ -131,14 +138,16 @@ export default function App() {
   return (
     <div className="wrapper">
       <header className="topbar">
-        <p className="course h1" aria-live="polite">{courseLabel}</p>
+        <p className="course h1" aria-live="polite" style={courseStyle}>
+          {courseLabel}
+        </p>
         <button
           className="btn"
           type="button"
           onClick={toggleUnits}
           aria-label={units === "imperial" ? "Switch to metric units" : "Switch to imperial units"}
         >
-          {units === "imperial" ? "°F · mph" : "°C · m/s"}
+          {units === "imperial" ? "°F · mph" : "°C · km/h"}
         </button>
       </header>
 
@@ -180,7 +189,7 @@ export default function App() {
                 <div className="wind-arrow-wrap">
                   <WindArrow
                     degrees={windRelative}
-                    size={200}
+                    size={188}
                     className="wind-arrow"
                     ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
                   />
@@ -250,12 +259,12 @@ export default function App() {
               <p className="h2">Precip Summary</p>
               <div className="precip-grid">
                 <div className="precip-cell">
-                  <span className="small">Next 1h</span>
-                  <span className="medium">{formatPrecip(wx.precip1h, units)}</span>
+                  <span className="small">Next 1h chance</span>
+                  <span className="medium">{formatPercent(wx.precipChance1h)}</span>
                 </div>
                 <div className="precip-cell">
-                  <span className="small">Next 3h</span>
-                  <span className="medium">{formatPrecip(wx.precip3h, units)}</span>
+                  <span className="small">Next 3h chance</span>
+                  <span className="medium">{formatPercent(wx.precipChance3h)}</span>
                 </div>
                 <div className="precip-cell">
                   <span className="small">24h total</span>

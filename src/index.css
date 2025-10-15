@@ -29,10 +29,10 @@ body {
   max-width: 390px;
   height: 100%;
   margin: 0 auto;
-  padding: 12px 10px 10px;
+  padding: 16px 14px 14px;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
-  gap: 8px;
+  gap: 12px;
 }
 
 .topbar {
@@ -72,8 +72,9 @@ body {
 
 .grid {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-content: start;
 }
 
 .card {
@@ -98,7 +99,7 @@ body {
 }
 
 .arrow svg {
-  color: var(--accent);
+  color: var(--text);
   transition: transform 0.1s linear;
 }
 
@@ -156,9 +157,7 @@ hr {
   margin: 0;
   line-height: 1.15;
   color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-wrap: balance;
 }
 
 .controls {
@@ -168,7 +167,7 @@ hr {
 main {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
 }
 
 .footer {
@@ -177,10 +176,10 @@ main {
 }
 
 .wind-card {
-  gap: 12px;
+  gap: 14px;
   align-items: stretch;
   text-align: center;
-  padding: 12px 12px 14px;
+  padding: 16px 16px 18px;
 }
 
 .wind-heading {
@@ -199,7 +198,7 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .wind-arrow-wrap {
@@ -219,7 +218,7 @@ main {
 }
 
 .wind-speed .huge {
-  font-size: 42px;
+  font-size: 46px;
 }
 
 
@@ -237,18 +236,16 @@ main {
 
 .stat-row {
   display: grid;
-  grid-template-columns: 1.25fr 0.75fr;
-  gap: 14px;
-  padding: 2px 2px 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  padding: 0 4px;
 }
 
 .stat-block {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  background: none;
-  border: none;
-  padding: 4px 0 6px;
+  gap: 10px;
+  padding: 8px 0 12px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -260,33 +257,33 @@ main {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px;
+  gap: 20px;
 }
 
 .stat-temp {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .stat-temp-value {
-  font-size: 46px;
+  font-size: 52px;
   line-height: 1;
 }
 
 .stat-humidity {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   align-items: flex-end;
 }
 
 .stat-humidity-value {
-  font-size: 26px;
+  font-size: 28px;
 }
 
 .stat-uv {
-  font-size: 26px;
+  font-size: 28px;
 }
 
 .medium {
@@ -295,22 +292,23 @@ main {
 }
 
 .precip-card {
-  gap: 8px;
+  gap: 12px;
+  padding: 14px 16px;
 }
 
 .precip-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 12px;
 }
 
 .precip-cell {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   align-items: flex-start;
 }
 
 .precip-cell .medium {
-  font-size: 17px;
+  font-size: 20px;
 }
