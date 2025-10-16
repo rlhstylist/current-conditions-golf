@@ -7,7 +7,7 @@ import { useHeading } from "./hooks/useHeading"
 import { WindArrow } from "./components/WindArrow"
 import type { Course } from "./lib/overpass"
 import { fetchWeather, type Weather } from "./lib/openmeteo"
-import { formatDir, formatPercent, formatPrecip, formatSpeed, formatTemp, type Units } from "./utils/units"
+import { formatDir, formatPrecip, formatSpeed, formatTemp, type Units } from "./utils/units"
 
 const UNITS_KEY = "ccg_units_v1"
 
@@ -193,12 +193,8 @@ export default function App() {
               </div>
               <div className="wind-hero">
                 <div className="wind-arrow-wrap">
-                  <WindArrow
-                    degrees={windRelative}
-                    size={168}
-                    className="wind-arrow"
-                    ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
-                  />
+                  {/* Pass deg to match WindArrow props */}
+                  <WindArrow deg={windRelative} />
                 </div>
                 <div className="wind-speed">
                   <div className="huge">{formatSpeed(wx.windSpeed, units)}</div>
