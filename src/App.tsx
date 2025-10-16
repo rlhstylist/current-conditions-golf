@@ -7,9 +7,9 @@ import { useHeading } from "./hooks/useHeading"
 import WindArrow from "./components/WindArrow"
 import type { Course } from "./lib/overpass"
 import { fetchWeather, type Weather } from "./lib/openmeteo"
-import { FlippableCard } from "./components/FlippableCard"
-import { UNITS_KEY } from "./utils/units";
-import { formatSpeed, formatTemp, formatDir, formatPrecip, type Units } from "./utils/units"
+import { formatDir, formatPercent, formatPrecip, formatSpeed, formatTemp, type Units } from "./utils/units"
+
+const UNITS_KEY = "ccg_units_v1"
 
 export default function App() {
   const { geo, request } = useGeo()
@@ -26,7 +26,7 @@ export default function App() {
   const [courseLoading, setCourseLoading] = useState(false)
   const [courseError, setCourseError] = useState<string | null>(null)
   const lastFetchId = useRef(0)
-  const { heading, status: headingStatus } = useHeading()
+  const { heading, status: headingStatus, request: requestHeading } = useHeading()
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -94,11 +94,6 @@ export default function App() {
   }, [targetLat, targetLon, updateWeather])
 
   const toggleUnits = () => setUnits((u) => (u === "imperial" ? "metric" : "imperial"))
-  const hourLabel = (iso: string) => {
-    const d = new Date(iso)
-    if (Number.isNaN(d.getTime())) return "--:--"
-    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })
-  }
 
   const courseLabel = useMemo(() => {
     if (course?.name) return course.name
@@ -125,226 +120,179 @@ export default function App() {
   }, [geo.status, courseLoading, course?.name, courseError])
 
   const windDir = wx?.windDir ?? 0
-  if (headingStatus !== "granted" || heading == null) return windDir
-  return windDir - heading
-}, [heading, headingStatus, windDir])
-const updatedDisplay = useMemo(() => {
-  if (!updatedAt) return "—"
-  return updatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
-}, [updatedAt])
-const updatedDateTime = updatedAt?.toISOString()
+  const windCardinal = formatDir(windDir)
+  const windDegrees = Math.round(windDir)
+  const windRelative = useMemo(() => {
+    if (headingStatus !== "granted" || heading == null) return windDir
+    return windDir - heading
+  }, [heading, headingStatus, windDir])
+  const updatedDisplay = useMemo(() => {
+    if (!updatedAt) return "—"
+    return updatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+  }, [updatedAt])
+  const updatedDateTime = updatedAt?.toISOString()
 
-const showLocationPrompt = geo.status !== "granted"
-const showStatus = !course?.name && Boolean(statusLabel)
+  const showLocationPrompt = geo.status !== "granted"
+  const showStatus = !course?.name && Boolean(statusLabel)
 
-return (
-  <div className="wrapper">
-    <header className="topbar">
-      <p className="course h1" aria-live="polite" style={courseStyle}>
-        {courseLabel}
-      </p>
-      <button
-        className="btn"
-        type="button"
-        onClick={toggleUnits}
-        aria-label={units === "imperial" ? "Switch to metric units" : "Switch to imperial units"}
-      >
-        {units === "imperial" ? "°F · mph" : "°C · km/h"}
-      </button>
-    </header>
+  return (
+    <div className="wrapper">
+      <header className="topbar">
+        <p className="course h1" aria-live="polite" style={courseStyle}>
+          {courseLabel}
+        </p>
+        <button
+          className="btn"
+          type="button"
+          onClick={toggleUnits}
+          aria-label={units === "imperial" ? "Switch to metric units" : "Switch to imperial units"}
+        >
+          {units === "imperial" ? "°F · mph" : "°C · km/h"}
+        </button>
+      </header>
 
-    {(showLocationPrompt || showStatus) && (
-      <div className="row controls">
-        {showLocationPrompt && (
-          <button
-            className="btn"
-            type="button"
-            onClick={() => void request()}
-            aria-label="Enable location access"
-          >
-            Enable location
-          </button>
-        )}
-        {showStatus && statusLabel && (
-          <span className="small" aria-live="polite">
-            {statusLabel}
-          </span>
-        )}
-      </div>
-    )}
-
-    <main>
-      {err && <div className="card small">Error: {err}</div>}
-      {!wx && geo.status !== "granted" && (
-        <div className="card small center">
-          Enable location to load the nearest course and live weather.
+      {(showLocationPrompt || showStatus) && (
+        <div className="row controls">
+          {showLocationPrompt && (
+            <button
+              className="btn"
+              type="button"
+              onClick={() => void request()}
+              aria-label="Enable location access"
+            >
+              Enable location
+            </button>
+          )}
+          {showStatus && statusLabel && (
+            <span className="small" aria-live="polite">
+              {statusLabel}
+            </span>
+          )}
         </div>
       )}
-      {wx && (
-        <>
-          <div className="grid">
-            <FlippableCard
-              ariaLabel="Wind conditions card"
-              front={() => (
-                <>
-                  <p className="h2">Wind</p>
-                  <div className="big">{formatSpeed(wx.windSpeed, units)}</div>
-                  <div className="small wind-meta">
-                    <WindArrow deg={wx.windDir} />
-                    <span>Gust {formatSpeed(wx.windGust, units)} · {formatDir(wx.windDir)}</span>
-                  </div>
-                </>
-              )}
-              back={() => {
-                const nextHour = wx.forecast.hours[0]
-                const nextLabel = nextHour ? hourLabel(nextHour) : "Next hour"
-                const windSpd = wx.forecast.windSpeed[0] ?? wx.windSpeed
-                const windGst = wx.forecast.windGust[0] ?? wx.windGust
-                const windDir = wx.forecast.windDir[0] ?? wx.windDir
-                return (
-                  <>
-                    <p className="h2">Wind · {nextLabel}</p>
-                    <div className="big">{formatSpeed(windSpd, units)}</div>
-                    <div className="small wind-meta">
-                      <WindArrow deg={windDir} />
-                      <span>Gust {formatSpeed(windGst, units)} · {formatDir(windDir)}</span>
-                    </div>
-                  </>
-                )
-              }}
-            />
 
-            <FlippableCard
-              ariaLabel="Temperature card"
-              front={() => (
-                <>
-                  <p className="h2">Temp</p>
-                  <div className="big">{formatTemp(wx.temp, units)}</div>
-                  <div className="small">Feels {formatTemp(wx.feels, units)}</div>
-                </>
-              )}
-              back={() => {
-                const nextHour = wx.forecast.hours[0]
-                const nextLabel = nextHour ? hourLabel(nextHour) : "Next hour"
-                const nextTemp = wx.forecast.temp[0] ?? wx.temp
-                const nextFeels = wx.forecast.feels[0] ?? wx.feels
-                return (
-                  <>
-                    <p className="h2">Temp · {nextLabel}</p>
-                    <div className="big">{formatTemp(nextTemp, units)}</div>
-                    <div className="small">Feels {formatTemp(nextFeels, units)}</div>
-                  </>
-                )
-              }}
-            />
-
-            <FlippableCard
-              ariaLabel="Humidity card"
-              front={() => (
-                <>
-                  <p className="h2">Humidity</p>
-                  <div className="big">{wx.humidity.toFixed(0)}%</div>
-                  <div className="small">Cloud {wx.cloud.toFixed(0)}%</div>
-                </>
-              )}
-              back={() => {
-                const nextHour = wx.forecast.hours[0]
-                const nextLabel = nextHour ? hourLabel(nextHour) : "Next hour"
-                const humidity = Math.round(wx.forecast.humidity[0] ?? wx.humidity)
-                const cloud = Math.round(wx.forecast.cloud[0] ?? wx.cloud)
-                return (
-                  <>
-                    <p className="h2">Humidity · {nextLabel}</p>
-                    <div className="big">{humidity}%</div>
-                    <div className="small">Cloud {cloud}%</div>
-                  </>
-                )
-              }}
-            />
-
-            <FlippableCard
-              ariaLabel="UV index card"
-              front={() => (
-                <>
-                  <p className="h2">UV</p>
-                  <div className="big">{wx.uv.toFixed(1)}</div>
-                  <div className="small">Next hr outlook</div>
-                </>
-              )}
-              back={() => {
-                const nextHour = wx.forecast.hours[0]
-                const nextLabel = nextHour ? hourLabel(nextHour) : "Next hour"
-                const uv = (wx.forecast.uv[0] ?? wx.uv).toFixed(1)
-                const cloud = Math.round(wx.forecast.cloud[0] ?? wx.cloud)
-                return (
-                  <>
-                    <p className="h2">UV · {nextLabel}</p>
-                    <div className="big">{uv}</div>
-                    <div className="small">Cloud {cloud}%</div>
-                  </>
-                )
-              }}
-            />
+      <main>
+        {err && <div className="card small">Error: {err}</div>}
+        {!wx && geo.status !== "granted" && (
+          <div className="card small center">
+            Enable location to load the nearest course and live weather.
           </div>
+        )}
+        {wx && (
+          <div className="grid">
+            <div className="card wind-card span2">
+              <div className="wind-heading">
+                <p className="h2">Wind</p>
+                <span className="small">{windCardinal} · {windDegrees}°</span>
+              </div>
+              <div className="wind-hero">
+                <div className="wind-arrow-wrap">
+                  <WindArrow
+                    degrees={windRelative}
+                    size={168}
+                    className="wind-arrow"
+                    ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
+                  />
+                </div>
+                <div className="wind-speed">
+                  <div className="huge">{formatSpeed(wx.windSpeed, units)}</div>
+                  <div className="small">Gust {formatSpeed(wx.windGust, units)}</div>
+                </div>
+              </div>
+              {headingStatus === "idle" && (
+                <button
+                  type="button"
+                  className="btn compass-btn"
+                  onClick={requestHeading}
+                  aria-label="Enable compass access for wind arrow"
+                >
+                  Enable compass
+                </button>
+              )}
+              {headingStatus === "pending" && (
+                <div className="small muted" aria-live="polite">
+                  Waiting for compass permission…
+                </div>
+              )}
+              {headingStatus === "denied" && (
+                <div className="compass-retry" aria-live="polite">
+                  <div className="small muted">Compass access denied</div>
+                  <button
+                    type="button"
+                    className="btn compass-btn"
+                    onClick={requestHeading}
+                    aria-label="Retry enabling compass access"
+                  >
+                    Try again
+                  </button>
+                </div>
+              )}
+              {headingStatus === "unsupported" && (
+                <div className="small muted" aria-live="polite">
+                  Compass not supported on this device
+                </div>
+              )}
+            </div>
+            <section
+              className="card climate-card span2"
+              aria-label="Temperature, humidity, UV index, and cloud cover"
+            >
+              <div className="climate-grid">
+                <div className="climate-temp">
+                  <div className="climate-line">
+                    <p className="small">Temperature</p>
+                    <div className="climate-main">{formatTemp(wx.temp, units)}</div>
+                  </div>
+                  <div className="climate-line">
+                    <p className="small">Feels</p>
+                    <div className="climate-main">{formatTemp(wx.feels, units)}</div>
+                  </div>
+                </div>
+                <div className="climate-stack">
+                  <div className="climate-item">
+                    <p className="small">Humidity</p>
+                    <div className="climate-value">{wx.humidity.toFixed(0)}%</div>
+                  </div>
+                  <div className="climate-item">
+                    <p className="small">UV</p>
+                    <div className="climate-value">{wx.uv.toFixed(1)}</div>
+                  </div>
+                  <div className="climate-item">
+                    <p className="small">Cloud</p>
+                    <div className="climate-value">{wx.cloud.toFixed(0)}%</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <section className="card precip-card span2" aria-label="Precipitation outlook">
+              <div className="precip-grid">
+                <div className="precip-cell">
+                  <p className="h2">Next 1h</p>
+                  <div className="precip-value">{formatPercent(wx.precipChance1h)}</div>
+                  <p className="small">Chance</p>
+                </div>
+                <div className="precip-cell">
+                  <p className="h2">Next 3h</p>
+                  <div className="precip-value">{formatPercent(wx.precipChance3h)}</div>
+                  <p className="small">Chance</p>
+                </div>
+                <div className="precip-cell">
+                  <p className="h2">24h total</p>
+                  <div className="precip-value">{formatPrecip(wx.precip24h, units)}</div>
+                  <p className="small">Accumulation</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
+      </main>
 
-          <hr />
-
-
-
-          <footer className="footer">
-            <span className="updated">
-              Updated {" "}
-              <time dateTime={updatedDateTime}>{updatedDisplay}</time>
-            </span>
-          </footer>
-        </div>
-      )
-}
-
-      type PrecipChartProps = {
-        hours: string[]
-      probs: number[]
-  hourLabel: (iso: string) => string
-}
-
-      function PrecipChart({hours, probs, hourLabel}: PrecipChartProps) {
-  const normalized = probs.map((val) => {
-    const num = Number.isFinite(val) ? val : 0
-      return Math.min(Math.max(num, 0), 100)
-  })
-      const count = normalized.length || 1
-      const baseY = 42
-      const amplitude = 32
-      const coords = normalized.length
-    ? normalized.map((prob, idx) => {
-        const x = count === 1 ? 50 : (idx / (count - 1)) * 100
-      const y = baseY - (prob / 100) * amplitude
-      return {x, y}
-      })
-      : [{x: 50, y: baseY }]
-      const polylinePoints = coords.map(({x, y}) => `${x},${y}`).join(" ") || "0,42 100,42"
-      const polygonPoints = [`0,${baseY}`, polylinePoints, `100,${baseY}`].join(" ")
-      const displayHours = (hours.length ? hours : Array.from({length: Math.max(count, 5) }, (_, idx) => `+${idx + 1}h`)).slice(0, 5)
-
-      return (
-      <div className="precip-chart-wrap">
-        <svg
-          className="precip-chart"
-          viewBox="0 0 100 44"
-          role="img"
-          aria-label="Chance of rain over the next five hours"
-        >
-          <polygon points={polygonPoints} className="precip-chart-fill" />
-          <polyline points={polylinePoints} className="precip-chart-line" />
-          {coords.map(({ x, y }, idx) => (
-            <circle key={`${x}-${idx}`} cx={x} cy={y} r={2.5} className="precip-chart-dot" />
-          ))}
-        </svg>
-        <div className="precip-chart-labels small">
-          {displayHours.map((hr, idx) => (
-            <span key={`${hr}-${idx}`}>{hr.includes("+") ? hr : hourLabel(hr)}</span>
-          ))}
-        </div>
-      </div>
-      )
+      <footer className="footer">
+        <span className="updated">
+          Updated {" "}
+          <time dateTime={updatedDateTime}>{updatedDisplay}</time>
+        </span>
+      </footer>
+    </div>
+  )
 }
