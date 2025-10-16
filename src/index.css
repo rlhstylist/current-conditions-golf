@@ -1,9 +1,13 @@
-﻿:root {
+:root {
   --bg: #0c0c0e;
   --card: #141416;
   --muted: #a9a9aa;
   --text: #e7e7e7;
   --line: #252528;
+  --card-alt: #e7e7e7;
+  --text-alt: #050608;
+  --muted-alt: #3f3f43;
+  --accent: #22d3ee;
 }
 
 * { box-sizing: border-box; }
@@ -51,6 +55,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 10px;
+  transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
 }
 .h1 { font-size: 22px; margin: 0; }
 .h2 { font-size: 13px; color: var(--muted); margin: 0 0 6px; }
@@ -59,3 +64,132 @@ body {
 .small { font-size: 12px; color: var(--muted); }
 hr { border: none; border-top: 1px dashed var(--line); margin: 10px 0; }
 .center { text-align:center; }
+
+.flippable {
+  cursor: pointer;
+  height: 100%;
+  perspective: 1200px;
+  outline: none;
+  display: block;
+}
+.flippable:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 3px;
+}
+.flippable-inner {
+  position: relative;
+  display: grid;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.flippable.is-flipped .flippable-inner {
+  transform: rotateY(180deg);
+}
+.flippable-face {
+  grid-area: 1 / 1 / 2 / 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 8px;
+  backface-visibility: hidden;
+}
+.flippable-front { transform: rotateY(0deg); }
+.flippable-back { transform: rotateY(180deg); }
+.flippable.is-flipped .flippable-front { pointer-events: none; }
+.flippable:not(.is-flipped) .flippable-back { pointer-events: none; }
+
+.flippable.is-flipped {
+  background: var(--card-alt);
+  color: var(--text-alt);
+  border-color: #5f5f64;
+}
+.flippable.is-flipped .h2 { color: var(--muted-alt); }
+.flippable.is-flipped .small { color: var(--muted-alt); }
+
+.precip-chart-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.precip-chart {
+  width: 100%;
+  height: 70px;
+  border: 1px dashed rgba(34, 211, 238, 0.25);
+  border-radius: 8px;
+  background: rgba(34, 211, 238, 0.08);
+}
+.precip-chart-fill {
+  fill: rgba(34, 211, 238, 0.12);
+}
+.precip-chart-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+}
+.precip-chart-dot {
+  fill: var(--accent);
+  stroke: none;
+}
+.precip-chart-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.flippable.is-flipped .precip-chart {
+  border-color: rgba(5, 6, 8, 0.25);
+  background: rgba(5, 6, 8, 0.08);
+}
+.flippable.is-flipped .precip-chart-fill {
+  fill: rgba(5, 6, 8, 0.12);
+}
+.flippable.is-flipped .precip-chart-line,
+.flippable.is-flipped .precip-chart-dot {
+  stroke: rgba(5, 6, 8, 0.8);
+  fill: rgba(5, 6, 8, 0.8);
+}
+.flippable.is-flipped .precip-chart-labels {
+  color: var(--muted-alt);
+}
+
+.wind-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wind-arrow {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+}
+
+.wind-arrow svg {
+  display: block;
+}
+
+.flippable.is-flipped .wind-arrow {
+  color: var(--muted-alt);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flippable-inner {
+    transition: none;
+    transform: none !important;
+  }
+  .flippable-face {
+    transform: none !important;
+    backface-visibility: visible;
+  }
+  .flippable:not(.is-flipped) .flippable-back {
+    display: none;
+  }
+  .flippable.is-flipped .flippable-front {
+    display: none;
+  }
+}
