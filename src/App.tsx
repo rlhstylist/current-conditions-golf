@@ -8,7 +8,7 @@ import WindArrow from "./components/WindArrow"
 import type { Course } from "./lib/overpass"
 import { fetchWeather, type Weather } from "./lib/openmeteo"
 import { FlippableCard } from "./components/FlippableCard"
-import { WindArrow } from "./components/WindArrow"
+import { UNITS_KEY } from "./utils/units";
 import { formatSpeed, formatTemp, formatDir, formatPrecip, type Units } from "./utils/units"
 
 export default function App() {
@@ -26,7 +26,7 @@ export default function App() {
   const [courseLoading, setCourseLoading] = useState(false)
   const [courseError, setCourseError] = useState<string | null>(null)
   const lastFetchId = useRef(0)
-  const { heading, status: headingStatus, request: requestHeading } = useHeading()
+  const { heading, status: headingStatus } = useHeading()
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -125,9 +125,6 @@ export default function App() {
   }, [geo.status, courseLoading, course?.name, courseError])
 
   const windDir = wx?.windDir ?? 0
-  const windCardinal = formatDir(windDir)
-  const windDegrees = Math.round(windDir)
-  const windRelative = useMemo(() => {
     if (headingStatus !== "granted" || heading == null) return windDir
     return windDir - heading
   }, [heading, headingStatus, windDir])
@@ -297,11 +294,12 @@ export default function App() {
                 ariaLabel="Precipitation next hour"
                 front={() => (
                   <>
+                  {/*  TODO: bring back when hourly precip is supported
                     <p className="h2">Precip next 1h</p>
                     <div className="big">{formatPrecip(wx.precip1h, units)}</div>
                     <div className="small">Chance {Math.round(wx.forecast.precipProb[0] ?? 0)}%</div>
                   </>
-                )}
+                */}
                 back={() => {
                   const nextHour = wx.forecast.hours[0]
                   const nextLabel = nextHour ? hourLabel(nextHour) : "Next hour"
@@ -324,11 +322,12 @@ export default function App() {
                 ariaLabel="Precipitation next three hours"
                 front={() => (
                   <>
+                  {/* TODO: bring back when 3-hour precip is supported
                     <p className="h2">Precip next 3h</p>
                     <div className="big">{formatPrecip(wx.precip3h, units)}</div>
                     <div className="small">Chance {Math.round(wx.forecast.precipProb[1] ?? wx.forecast.precipProb[0] ?? 0)}%</div>
                   </>
-                )}
+                */}
                 back={() => {
                   const label = wx.forecast.hours[0] ? `${hourLabel(wx.forecast.hours[0])} →` : "Next hrs"
                   const total = wx.forecast.precip.slice(0, 3).reduce((acc, v) => acc + (v ?? 0), 0)

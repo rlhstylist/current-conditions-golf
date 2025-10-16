@@ -89,8 +89,6 @@ export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
 
   // Next windows starting "now" (best-effort; open-meteo returns future hours)
   const precipWindow = hourlyPrecip.slice(normalizedIndex)
-  const precip1h = sum(precipWindow, 1)
-  const precip3h = sum(precipWindow, 3)
   const precip24h = sum(precipWindow, 24)
 
   return {
