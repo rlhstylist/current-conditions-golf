@@ -317,3 +317,14 @@ main {
   font-size: calc(26px * var(--scale));
   line-height: 1;
 }
+ /* ensure all cards and any future flipped faces share rounding */
+ .card,
+ .card .front,
+ .card .back,
+ .card .glitch-overlay {
+   border-radius: 10px;
+ }
+ .card { overflow: hidden; } /* clip edges during flip */
+ /* wind arrow inherits the surrounding text color */
+ .wind-arrow { color: inherit; }
+ .wind-arrow svg { display:block; }
