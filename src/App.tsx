@@ -126,6 +126,7 @@ export default function App() {
     if (headingStatus !== "granted" || heading == null) return windDir
     return windDir - heading
   }, [heading, headingStatus, windDir])
+
   const updatedDisplay = useMemo(() => {
     if (!updatedAt) return "—"
     return updatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
@@ -173,17 +174,22 @@ export default function App() {
 
       <main>
         {err && <div className="card small">Error: {err}</div>}
+
         {!wx && geo.status !== "granted" && (
           <div className="card small center">
             Enable location to load the nearest course and live weather.
           </div>
         )}
+
         {wx && (
           <div className="grid">
+            {/* Wind */}
             <div className="card wind-card span2">
               <div className="wind-heading">
                 <p className="h2">Wind</p>
-                <span className="small">{windCardinal} · {windDegrees}°</span>
+                <span className="small">
+                  {windCardinal} · {windDegrees}°
+                </span>
               </div>
               <div className="wind-hero">
                 <div className="wind-arrow-wrap">
@@ -199,6 +205,7 @@ export default function App() {
                   <div className="small">Gust {formatSpeed(wx.windGust, units)}</div>
                 </div>
               </div>
+
               {headingStatus === "idle" && (
                 <button
                   type="button"
@@ -233,6 +240,8 @@ export default function App() {
                 </div>
               )}
             </div>
+
+            {/* Climate: temp/humidity/UV/cloud */}
             <section
               className="card climate-card span2"
               aria-label="Temperature, humidity, UV index, and cloud cover"
@@ -264,41 +273,43 @@ export default function App() {
                 </div>
               </div>
             </section>
+
+            {/* Precipitation outlook */}
             <section className="card precip-card span2" aria-label="Precipitation outlook">
               <div className="precip-grid">
                 <div className="precip-cell">
                   <p className="h2">Next 1h</p>
                   {/* TODO: hourly precip chance
-                  <div className="precip-value">{formatPercent(wx.precipChance1h)}</div>
-                  <p className="small">Chance</p>
-                */}
+                    <div className="precip-value">{formatPercent(wx.precipChance1h)}</div>
+                    <p className="small">Chance</p>
+                  */}
                 </div>
 
-                {/* TODO: 3h precip chance
                 <div className="precip-cell">
                   <p className="h2">Next 3h</p>
-                  <div className="precip-value">{formatPercent(wx.precipChance3h)}</div>
-                  <p className="small">Chance</p>
-                */}
-              </div>
-              <div className="precip-cell">
-                <p className="h2">24h total</p>
-                <div className="precip-value">{formatPrecip(wx.precip24h, units)}</div>
-                <p className="small">Accumulation</p>
-              </div>
-          </div>
-            </section>
-    </div>
-  )
-}
-      </main >
+                  {/* TODO: 3h precip chance
+                    <div className="precip-value">{formatPercent(wx.precipChance3h)}</div>
+                    <p className="small">Chance</p>
+                  */}
+                </div>
 
-  <footer className="footer">
-    <span className="updated">
-      Updated {" "}
-      <time dateTime={updatedDateTime}>{updatedDisplay}</time>
-    </span>
-  </footer>
-    </div >
+                <div className="precip-cell">
+                  <p className="h2">24h total</p>
+                  <div className="precip-value">{formatPrecip(wx.precip24h, units)}</div>
+                  <p className="small">Accumulation</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
+      </main>
+
+      <footer className="footer">
+        <span className="updated">
+          Updated{" "}
+          <time dateTime={updatedDateTime}>{updatedDisplay}</time>
+        </span>
+      </footer>
+    </div>
   )
 }
