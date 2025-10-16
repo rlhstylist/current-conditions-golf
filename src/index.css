@@ -102,7 +102,7 @@ body {
 }
 
 .arrow svg {
-  color: var(--text);
+  color: currentColor;
   transition: transform 0.1s linear;
 }
 
@@ -211,6 +211,7 @@ main {
 
 .wind-arrow {
   margin: 0;
+  color: inherit;
 }
 
 .wind-speed {
@@ -316,4 +317,197 @@ main {
 .precip-value {
   font-size: calc(26px * var(--scale));
   line-height: 1;
+}
+
+.precip-chart {
+  width: 100%;
+  height: 58px;
+  display: block;
+}
+
+.precip-chart-baseline {
+  stroke: currentColor;
+  stroke-width: 0.9;
+  opacity: 0.24;
+}
+
+.precip-chart-line {
+  stroke: currentColor;
+  stroke-width: 1.4;
+  fill: none;
+  opacity: 0.52;
+}
+
+.precip-chart-dot {
+  fill: currentColor;
+  opacity: 0.7;
+}
+
+.precip-chart-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3.9px;
+  margin-top: 3.9px;
+}
+
+.card-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  margin-left: 4px;
+  border-radius: 4px;
+  font-size: calc(10px * var(--scale));
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  background: color-mix(in srgb, var(--accent) 40%, transparent);
+  color: inherit;
+}
+
+.flip-card-wrapper {
+  position: relative;
+  height: 100%;
+  perspective: 1400px;
+  -webkit-perspective: 1400px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.flip-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  border-radius: inherit;
+  outline: none;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+
+.flip-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.flip-card-inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.26s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+}
+
+.flip-card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: block;
+}
+
+.flip-card-front {
+  transform: rotateY(0deg);
+  -webkit-transform: rotateY(0deg);
+}
+
+.flip-card-face.card {
+  margin: 0;
+  height: 100%;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+}
+
+.flip-card-back.card {
+  background: var(--text);
+  border-color: color-mix(in srgb, var(--text) 65%, var(--bg) 35%);
+  color: var(--bg);
+}
+
+.flip-card-back.card .h2,
+.flip-card-back.card .small,
+.flip-card-back.card .muted {
+  color: color-mix(in srgb, var(--bg) 75%, transparent);
+}
+
+.flip-card-scan {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(125deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 38%, rgba(0, 0, 0, 0.2) 70%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0, rgba(255, 255, 255, 0.05) 1px, rgba(0, 0, 0, 0) 1px, rgba(0, 0, 0, 0) 3px);
+  mix-blend-mode: overlay;
+  opacity: 0;
+  animation: flip-scan 3.4s linear infinite;
+  transition: opacity 0.18s ease;
+}
+
+.flip-card:hover .flip-card-scan,
+.flip-card.is-flipped .flip-card-scan {
+  opacity: 0.22;
+}
+
+@keyframes flip-scan {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: 0 -180px, 0 -36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-card-wrapper {
+    perspective: none;
+  }
+
+  .flip-card-inner {
+    transform: none !important;
+    transition: none;
+  }
+
+  .flip-card-face {
+    transform: none !important;
+  }
+
+  .flip-card-front {
+    opacity: 1;
+  }
+
+  .flip-card-back {
+    opacity: 0;
+  }
+
+  .flip-card-front,
+  .flip-card-back {
+    transition: opacity 0.14s ease;
+  }
+
+  .flip-card.is-flipped .flip-card-front {
+    opacity: 0;
+  }
+
+  .flip-card.is-flipped .flip-card-back {
+    opacity: 1;
+  }
+
+  .flip-card-scan {
+    animation: none;
+    opacity: 0;
+  }
 }

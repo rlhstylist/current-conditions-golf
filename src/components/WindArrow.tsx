@@ -41,6 +41,8 @@ export default function WindArrow({ degrees, size = 44, className, ariaLabel }: 
         <path
           d="M24 4 44 24H32v20H16V24H4z"
           fill="currentColor"
+          stroke="currentColor"
+          strokeWidth="1"
         />
       </svg>
     </span>
