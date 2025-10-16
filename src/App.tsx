@@ -4,7 +4,7 @@ import { useGeo } from "./hooks/useGeo"
 import { loadCourse, pickNearest } from "./hooks/useCourse"
 import type { CourseState } from "./hooks/useCourse"
 import { useHeading } from "./hooks/useHeading"
-import WindArrow from "./components/WindArrow"
+import { WindArrow } from "./components/WindArrow"
 import type { Course } from "./lib/overpass"
 import { fetchWeather, type Weather } from "./lib/openmeteo"
 import { formatDir, formatPercent, formatPrecip, formatSpeed, formatTemp, type Units } from "./utils/units"
@@ -268,14 +268,18 @@ export default function App() {
               <div className="precip-grid">
                 <div className="precip-cell">
                   <p className="h2">Next 1h</p>
+                  {/* TODO: hourly precip chance
                   <div className="precip-value">{formatPercent(wx.precipChance1h)}</div>
                   <p className="small">Chance</p>
                 </div>
+                */}
+                {/* TODO: 3h precip chance
                 <div className="precip-cell">
                   <p className="h2">Next 3h</p>
                   <div className="precip-value">{formatPercent(wx.precipChance3h)}</div>
                   <p className="small">Chance</p>
                 </div>
+                */}
                 <div className="precip-cell">
                   <p className="h2">24h total</p>
                   <div className="precip-value">{formatPrecip(wx.precip24h, units)}</div>
