@@ -21,8 +21,6 @@ export type Weather = {
   humidity: number
   uv: number
   cloud: number
-  precip1h: number
-  precip3h: number
   precip24h: number
   forecast: ForecastSlice
 }
@@ -64,6 +62,7 @@ export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
     "precipitation",
   ].join(","))
   url.searchParams.set("precipitation_unit", "mm")
+  url.searchParams.set("wind_speed_unit", "ms")
   url.searchParams.set("timezone", "auto")
 
   const res = await fetch(url.toString())
@@ -103,8 +102,6 @@ export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
     humidity:  Number(cur?.relative_humidity_2m ?? 0),
     uv:        Number(cur?.uv_index ?? 0),
     cloud:     Number(cur?.cloud_cover ?? 0),
-    precip1h,
-    precip3h,
     precip24h,
     forecast: {
       hours,

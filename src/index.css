@@ -10,46 +10,68 @@
   --accent: #22d3ee;
 }
 
-* { box-sizing: border-box; }
-html, body, #root { height: 100%; }
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font: 15px/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: calc(14px * var(--scale));
+  line-height: 1.3;
   -webkit-font-smoothing: antialiased;
 }
 
 .wrapper {
-  max-width: 390px;   /* iPhone 14 logical width */
+  max-width: 390px;
   height: 100%;
   margin: 0 auto;
-  padding: 16px 12px;
+  padding: 15.5px 13.6px 13.6px;
   display: grid;
-  grid-template-rows: auto auto 1fr;
-  gap: 12px;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 11.6px;
 }
 
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 9.7px;
+}
+
+.topbar .course {
+  flex: 1;
 }
 
 .btn {
-  background: var(--card);
+  font: inherit;
+  background: var(--panel);
   color: var(--text);
-  border: 1px solid var(--line);
-  padding: 6px 10px;
+  border: 1px solid var(--border);
+  padding: 4.9px 8.7px;
   border-radius: 8px;
+  cursor: pointer;
 }
-.btn:active { transform: translateY(1px); }
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11.6px;
+  align-content: start;
 }
+
 .card {
   background: var(--card);
   border: 1px solid var(--line);
