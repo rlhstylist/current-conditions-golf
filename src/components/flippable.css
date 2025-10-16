@@ -1,0 +1,96 @@
+.flip-card {
+  position: relative;
+  perspective: 1200px;
+  cursor: pointer;
+  height: 100%;
+}
+
+.flip-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.flip-card__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 520ms cubic-bezier(.18, .72, .24, 1);
+}
+
+.flip-card.is-flipped .flip-card__inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card__face {
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.flip-card__front {
+  position: relative;
+  z-index: 2;
+}
+
+.flip-card__back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  overflow: hidden;
+}
+
+.invert-theme {
+  background: #f5f6f7;
+  color: #0d0f10;
+}
+
+.invert-theme .card,
+.invert-theme .wind-card,
+.invert-theme .climate-card,
+.invert-theme .precip-card {
+  background: inherit;
+  color: inherit;
+  border-color: rgba(15, 18, 24, 0.18);
+}
+
+.flip-glitch {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(12, 15, 18, 0.08) 0%,
+      rgba(12, 15, 18, 0) 16%,
+      rgba(12, 15, 18, 0.04) 32%,
+      rgba(12, 15, 18, 0) 48%,
+      rgba(12, 15, 18, 0.05) 64%,
+      rgba(12, 15, 18, 0) 80%,
+      rgba(12, 15, 18, 0.08) 100%
+    );
+  mix-blend-mode: multiply;
+  opacity: 0.35;
+  animation: flip-glitch 120ms steps(2) infinite;
+  pointer-events: none;
+}
+
+@keyframes flip-glitch {
+  0% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.15;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+.flip-card.invert-theme,
+.flip-card .invert-theme {
+  background: #f5f6f7;
+}
+
+.flip-card .invert-theme .small {
+  color: rgba(13, 15, 16, 0.6);
+}

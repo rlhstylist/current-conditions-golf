@@ -1,0 +1,35 @@
+.precip-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+}
+
+.precip-chart svg {
+  width: 100%;
+  height: 96px;
+  overflow: visible;
+}
+
+.precip-chart__labels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.precip-chart__label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.precip-chart__value {
+  font-size: calc(18px * var(--scale));
+  line-height: 1.1;
+}
+
+.precip-chart__time {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
