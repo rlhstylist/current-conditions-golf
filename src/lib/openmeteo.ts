@@ -131,7 +131,10 @@ export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
     precip24h: sum(hourlyPrecip.slice(nextIndex), 24),
   }
 
-  const precipChanceNext5h = takeSlice(probability.map((value) => clampProbability(value)), 5)
+  const precipChanceNext5h = takeSlice(
+    probability.slice(nextIndex).map((value) => clampProbability(value)),
+    5
+  )
 
   return {
     windSpeed: Number(cur?.wind_speed_10m ?? 0),

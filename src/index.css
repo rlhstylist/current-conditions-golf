@@ -370,6 +370,8 @@ main {
   height: 100%;
   perspective: 1400px;
   -webkit-perspective: 1400px;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .flip-card {
@@ -378,8 +380,10 @@ main {
   width: 100%;
   height: 100%;
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: inherit;
   outline: none;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
 }
 
 .flip-card:focus-visible {
@@ -389,14 +393,13 @@ main {
 
 .flip-card-inner {
   position: relative;
-  display: grid;
+  display: block;
   width: 100%;
   height: 100%;
-  border-radius: 10px;
+  border-radius: inherit;
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
   transition: transform 0.26s cubic-bezier(0.4, 0.2, 0.2, 1);
-  overflow: hidden;
 }
 
 .flip-card.is-flipped .flip-card-inner {
@@ -405,10 +408,12 @@ main {
 }
 
 .flip-card-face {
-  grid-area: 1 / 1;
-  border-radius: 10px;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  display: block;
 }
 
 .flip-card-front {
@@ -418,6 +423,7 @@ main {
 
 .flip-card-face.card {
   margin: 0;
+  height: 100%;
 }
 
 .flip-card-back {
@@ -438,8 +444,9 @@ main {
 }
 
 .flip-card-scan {
-  grid-area: 1 / 1;
-  border-radius: 10px;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   pointer-events: none;
   background:
     linear-gradient(125deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 38%, rgba(0, 0, 0, 0.2) 70%),
