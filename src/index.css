@@ -369,6 +369,7 @@ main {
   position: relative;
   height: 100%;
   perspective: 1400px;
+  -webkit-perspective: 1400px;
 }
 
 .flip-card {
@@ -393,18 +394,26 @@ main {
   height: 100%;
   border-radius: 10px;
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   transition: transform 0.26s cubic-bezier(0.4, 0.2, 0.2, 1);
   overflow: hidden;
 }
 
 .flip-card.is-flipped .flip-card-inner {
   transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
 }
 
 .flip-card-face {
   grid-area: 1 / 1;
   border-radius: 10px;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card-front {
+  transform: rotateY(0deg);
+  -webkit-transform: rotateY(0deg);
 }
 
 .flip-card-face.card {
@@ -413,6 +422,7 @@ main {
 
 .flip-card-back {
   transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
 }
 
 .flip-card-back.card {
