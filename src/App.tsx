@@ -271,32 +271,34 @@ export default function App() {
                   {/* TODO: hourly precip chance
                   <div className="precip-value">{formatPercent(wx.precipChance1h)}</div>
                   <p className="small">Chance</p>
-                </div>
                 */}
+                </div>
+
                 {/* TODO: 3h precip chance
                 <div className="precip-cell">
                   <p className="h2">Next 3h</p>
                   <div className="precip-value">{formatPercent(wx.precipChance3h)}</div>
                   <p className="small">Chance</p>
-                </div>
                 */}
-                <div className="precip-cell">
-                  <p className="h2">24h total</p>
-                  <div className="precip-value">{formatPrecip(wx.precip24h, units)}</div>
-                  <p className="small">Accumulation</p>
-                </div>
               </div>
-            </section>
+              <div className="precip-cell">
+                <p className="h2">24h total</p>
+                <div className="precip-value">{formatPrecip(wx.precip24h, units)}</div>
+                <p className="small">Accumulation</p>
+              </div>
           </div>
-        )}
-      </main>
-
-      <footer className="footer">
-        <span className="updated">
-          Updated {" "}
-          <time dateTime={updatedDateTime}>{updatedDisplay}</time>
-        </span>
-      </footer>
+            </section>
     </div>
+  )
+}
+      </main >
+
+  <footer className="footer">
+    <span className="updated">
+      Updated {" "}
+      <time dateTime={updatedDateTime}>{updatedDisplay}</time>
+    </span>
+  </footer>
+    </div >
   )
 }
