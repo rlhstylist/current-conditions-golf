@@ -5,6 +5,136 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>current-conditions-golf</title>
+    <script>
+      ;(function () {
+        var blockedHosts = ["cdn.segment.com", "sessions.bugsnag.com"]
+        if (typeof window === "undefined") return
+        if (window.__ccgAnalyticsBlocker__) return
+        window.__ccgAnalyticsBlocker__ = true
+
+        var matchesBlockedHost = function (value) {
+          if (!value) return false
+          try {
+            var url = new URL(value, window.location.origin)
+            return blockedHosts.indexOf(url.hostname) !== -1
+          } catch (error) {
+            for (var i = 0; i < blockedHosts.length; i += 1) {
+              if (value.indexOf(blockedHosts[i]) !== -1) {
+                return true
+              }
+            }
+            return false
+          }
+        }
+
+        var neutralizeScript = function (script) {
+          if (!matchesBlockedHost(script.src) && !matchesBlockedHost(script.getAttribute("src"))) {
+            return false
+          }
+
+          var original = script.getAttribute("src") || script.src
+          if (original) {
+            script.setAttribute("data-blocked-src", original)
+          }
+
+          script.removeAttribute("src")
+          script.type = "text/plain"
+          if (script.parentNode) {
+            script.parentNode.removeChild(script)
+          }
+          return true
+        }
+
+        var guardAppendChild = function (original) {
+          return function appendChild(child) {
+            if (child instanceof HTMLScriptElement) {
+              if (neutralizeScript(child)) {
+                return child
+              }
+            }
+            return original.call(this, child)
+          }
+        }
+
+        var guardInsertBefore = function (original) {
+          return function insertBefore(child, ref) {
+            if (child instanceof HTMLScriptElement) {
+              if (neutralizeScript(child)) {
+                return child
+              }
+            }
+            return original.call(this, child, ref)
+          }
+        }
+
+        var overrideSetAttribute = function () {
+          var original = HTMLScriptElement.prototype.setAttribute
+          HTMLScriptElement.prototype.setAttribute = function setAttribute(name, value) {
+            if (name === "src" && matchesBlockedHost(value)) {
+              neutralizeScript(this)
+              return
+            }
+            return original.call(this, name, value)
+          }
+        }
+
+        var overrideSrcDescriptor = function () {
+          var descriptor = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, "src")
+          if (!descriptor || descriptor.configurable === false || !descriptor.set || !descriptor.get) {
+            return
+          }
+
+          Object.defineProperty(HTMLScriptElement.prototype, "src", {
+            configurable: true,
+            enumerable: descriptor.enumerable === undefined ? false : descriptor.enumerable,
+            get: function () {
+              return descriptor.get.call(this)
+            },
+            set: function (value) {
+              if (matchesBlockedHost(value)) {
+                neutralizeScript(this)
+                return
+              }
+              descriptor.set.call(this, value)
+            },
+          })
+        }
+
+        var observeMutations = function () {
+          var observer = new MutationObserver(function (mutations) {
+            for (var i = 0; i < mutations.length; i += 1) {
+              var mutation = mutations[i]
+              for (var j = 0; j < mutation.addedNodes.length; j += 1) {
+                var node = mutation.addedNodes[j]
+                if (node instanceof HTMLScriptElement) {
+                  neutralizeScript(node)
+                } else if (node instanceof Element) {
+                  var scripts = node.querySelectorAll("script")
+                  for (var k = 0; k < scripts.length; k += 1) {
+                    neutralizeScript(scripts[k])
+                  }
+                }
+              }
+            }
+          })
+
+          observer.observe(document.documentElement, { childList: true, subtree: true })
+        }
+
+        Node.prototype.appendChild = guardAppendChild(Node.prototype.appendChild)
+        Node.prototype.insertBefore = guardInsertBefore(Node.prototype.insertBefore)
+        overrideSetAttribute()
+        overrideSrcDescriptor()
+        observeMutations()
+
+        var scripts = document.querySelectorAll("script")
+        scripts.forEach(function (script) {
+          if (script instanceof HTMLScriptElement) {
+            neutralizeScript(script)
+          }
+        })
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
