@@ -102,7 +102,7 @@ body {
 }
 
 .arrow svg {
-  color: var(--text);
+  color: inherit;
   transition: transform 0.1s linear;
 }
 
@@ -316,4 +316,153 @@ main {
 .precip-value {
   font-size: calc(26px * var(--scale));
   line-height: 1;
+}
+
+.flip-card {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  perspective: 1200px;
+}
+
+.flip-card__button {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 10px;
+  overflow: hidden;
+  font: inherit;
+  color: inherit;
+}
+
+.flip-card__button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.flip-card__inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  transform-style: preserve-3d;
+  transition: transform 0.26s cubic-bezier(0.45, 0.15, 0.1, 1);
+}
+
+.flip-card__inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(80, 255, 190, 0),
+    rgba(80, 255, 190, 0) 6px,
+    rgba(80, 255, 190, 0.08) 7px
+  );
+  background-size: 100% 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.flip-card.is-flipped .flip-card__inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card.is-flipped .flip-card__inner::after {
+  opacity: 0.18;
+  animation: flip-card-scanline 1.6s linear infinite;
+}
+
+.flip-card__face {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.flip-card__face > * {
+  height: 100%;
+}
+
+.flip-card__back {
+  transform: rotateY(180deg);
+}
+
+.flip-card.is-flipped .flip-card__front {
+  pointer-events: none;
+}
+
+@keyframes flip-card-scanline {
+  from {
+    background-position-y: 0;
+  }
+  to {
+    background-position-y: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-card__inner {
+    transform: none !important;
+    transition: none;
+  }
+
+  .flip-card__face {
+    transition: opacity 0.12s ease;
+  }
+
+  .flip-card__back {
+    transform: none;
+    opacity: 0;
+  }
+
+  .flip-card.is-flipped .flip-card__back {
+    opacity: 1;
+  }
+
+  .flip-card.is-flipped .flip-card__front {
+    opacity: 0;
+  }
+
+  .flip-card__inner::after {
+    display: none;
+  }
+}
+
+.card--inverse {
+  background: #f4f6f9;
+  border-color: #d5dce7;
+  color: #1c232c;
+}
+
+.card--inverse .small,
+.card--inverse .muted {
+  color: rgba(28, 35, 44, 0.65);
+}
+
+.card--inverse .h2 {
+  color: rgba(28, 35, 44, 0.7);
+}
+
+.card--inverse .btn {
+  background: rgba(255, 255, 255, 0.92);
+  color: #1c232c;
+  border-color: rgba(28, 35, 44, 0.2);
+}
+
+.card--inverse .btn:focus-visible {
+  outline-color: rgba(28, 35, 44, 0.55);
+}
+
+.precip-chart {
+  display: block;
+  width: 100%;
+  height: 44px;
+}
+
+.precip-cell--chart {
+  gap: 5.8px;
 }
