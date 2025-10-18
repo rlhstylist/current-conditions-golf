@@ -44,6 +44,16 @@ body {
   position: relative;
 }
 
+@supports (min-height: 100dvh) {
+  body {
+    min-height: 100dvh;
+  }
+
+  .wrapper {
+    min-height: 100dvh;
+  }
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -438,6 +448,10 @@ main {
 .wind-arrow {
   margin: 0;
   color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center;
 }
 
 .wind-speed {
@@ -586,7 +600,9 @@ main {
   display: grid;
   grid-template-columns: 1fr;
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   transition: transform 0.32s cubic-bezier(0.45, 0.15, 0.1, 1.02);
+  will-change: transform;
 }
 
 .flip-card__inner::after {
@@ -608,6 +624,7 @@ main {
 
 .flip-card.is-flipped .flip-card__inner {
   transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
 }
 
 .flip-card.is-flipped .flip-card__inner::after {
@@ -618,8 +635,10 @@ main {
 .flip-card__face {
   grid-area: 1 / 1;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   border-radius: var(--radius);
   overflow: hidden;
+  transform: translateZ(0);
 }
 
 .flip-card__face > * {
@@ -628,10 +647,96 @@ main {
 
 .flip-card__back {
   transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
 }
 
 .flip-card.is-flipped .flip-card__front {
   pointer-events: none;
+}
+
+@media (max-height: 780px) {
+  :root {
+    --scale: 0.9;
+  }
+
+  .wrapper {
+    padding: 16px 14px 14px;
+    gap: 14px;
+  }
+
+  .topbar {
+    gap: 14px;
+  }
+
+  .grid {
+    gap: 12px;
+  }
+
+  .card {
+    padding: 16px 16px 18px;
+    gap: 8px;
+  }
+
+  .wind-card {
+    padding: 18px 16px 20px;
+    gap: 12px;
+  }
+
+  .wind-arrow-wrap {
+    width: 170px;
+    height: 170px;
+  }
+
+  .wind-card .wind-arrow {
+    transform: scale(0.92);
+  }
+
+  .climate-card {
+    padding: 18px 16px;
+    gap: 14px;
+  }
+
+  .climate-grid {
+    gap: 12px;
+  }
+
+  .precip-card {
+    padding: 18px 16px;
+    gap: 10px;
+  }
+
+  .precip-grid {
+    gap: 10px;
+  }
+}
+
+@media (max-height: 720px) {
+  :root {
+    --scale: 0.84;
+  }
+
+  .wrapper {
+    padding: 14px 12px 12px;
+    gap: 12px;
+  }
+
+  .status-strip {
+    padding: 6px 14px;
+  }
+
+  .wind-arrow-wrap {
+    width: 156px;
+    height: 156px;
+  }
+
+  .wind-card .wind-arrow {
+    transform: scale(0.86);
+  }
+
+  .climate-card,
+  .precip-card {
+    padding: 16px 14px;
+  }
 }
 
 @keyframes flip-card-scanline {
