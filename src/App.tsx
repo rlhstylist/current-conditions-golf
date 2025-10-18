@@ -50,11 +50,20 @@ export default function App() {
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    const blockedHosts = ["cdn.segment.com", "sessions.bugsnag.com"]
+    const blockedHosts = ["cdn.segment.com", "sessions.bugsnag.com"] as const
+    const matchesBlockedHost = (value: string | null | undefined): boolean => {
+      if (!value) return false
+      try {
+        const url = new URL(value, window.location.origin)
+        return blockedHosts.some((host) => url.hostname === host)
+      } catch {
+        return blockedHosts.some((host) => value.includes(host))
+      }
+    }
     const matchesBlocked = (value: unknown): boolean => {
       if (!value) return false
       if (typeof value === "string") {
-        return blockedHosts.some((host) => value.includes(host))
+        return matchesBlockedHost(value)
       }
       if (value instanceof Error) {
         return matchesBlocked(value.message) || matchesBlocked(value.stack)
@@ -63,6 +72,78 @@ export default function App() {
         return Object.values(value as Record<string, unknown>).some((entry) => matchesBlocked(entry))
       }
       return false
+    }
+    const shouldBlockScript = (script: HTMLScriptElement): boolean => {
+      const srcAttr = script.getAttribute("src")
+      return matchesBlockedHost(script.src) || matchesBlockedHost(srcAttr)
+    }
+    const detachScript = (script: HTMLScriptElement) => {
+      script.dataset.blockedSrc = script.getAttribute("src") ?? script.src
+      if (script.parentNode) {
+        script.parentNode.removeChild(script)
+      }
+    }
+    const originalAppendChild = Node.prototype.appendChild
+    const patchedAppendChild: typeof originalAppendChild = function appendChild<T extends Node>(
+      this: Node,
+      child: T,
+    ): T {
+      if (child instanceof HTMLScriptElement && shouldBlockScript(child)) {
+        detachScript(child)
+        return child
+      }
+      return originalAppendChild.call(this, child) as T
+    }
+    Node.prototype.appendChild = patchedAppendChild
+    const originalInsertBefore = Node.prototype.insertBefore
+    const patchedInsertBefore: typeof originalInsertBefore = function insertBefore<T extends Node>(
+      this: Node,
+      child: T,
+      ref: Node | null,
+    ): T {
+      if (child instanceof HTMLScriptElement && shouldBlockScript(child)) {
+        detachScript(child)
+        return child
+      }
+      return originalInsertBefore.call(this, child, ref) as T
+    }
+    Node.prototype.insertBefore = patchedInsertBefore
+    const originalSetAttribute = HTMLScriptElement.prototype.setAttribute
+    HTMLScriptElement.prototype.setAttribute = function setAttribute(name: string, value: string) {
+      if (name === "src" && matchesBlockedHost(value)) {
+        this.removeAttribute("src")
+        this.dataset.blockedSrc = value
+        if (this.parentNode) {
+          this.parentNode.removeChild(this)
+        }
+        return
+      }
+      return originalSetAttribute.call(this, name, value)
+    }
+    const originalSrcDescriptor = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, "src")
+    let restoreSrc: (() => void) | null = null
+    if (originalSrcDescriptor?.configurable !== false && originalSrcDescriptor?.set && originalSrcDescriptor?.get) {
+      Object.defineProperty(HTMLScriptElement.prototype, "src", {
+        configurable: true,
+        enumerable: originalSrcDescriptor.enumerable ?? false,
+        get(this: HTMLScriptElement) {
+          return originalSrcDescriptor.get?.call(this)
+        },
+        set(this: HTMLScriptElement, value: string) {
+          if (matchesBlockedHost(value)) {
+            this.removeAttribute("src")
+            this.dataset.blockedSrc = value
+            if (this.parentNode) {
+              this.parentNode.removeChild(this)
+            }
+            return
+          }
+          originalSrcDescriptor.set!.call(this, value)
+        },
+      })
+      restoreSrc = () => {
+        Object.defineProperty(HTMLScriptElement.prototype, "src", originalSrcDescriptor)
+      }
     }
     const handleResourceError = (event: Event) => {
       const target = event.target
@@ -77,7 +158,7 @@ export default function App() {
             : target instanceof HTMLImageElement
               ? target.src
               : target.src
-        if (source && matchesBlocked(source)) {
+        if (source && matchesBlockedHost(source)) {
           event.stopImmediatePropagation()
           event.preventDefault()
         }
@@ -97,12 +178,23 @@ export default function App() {
       originalConsoleError(...args)
     }
     window.console.error = consoleError
+    document
+      .querySelectorAll<HTMLScriptElement>("script[src]")
+      .forEach((script) => {
+        if (shouldBlockScript(script)) {
+          detachScript(script)
+        }
+      })
     window.addEventListener("error", handleResourceError, true)
     window.addEventListener("unhandledrejection", handleRejection)
     return () => {
       window.removeEventListener("error", handleResourceError, true)
       window.removeEventListener("unhandledrejection", handleRejection)
       window.console.error = originalConsoleError
+      Node.prototype.appendChild = originalAppendChild
+      Node.prototype.insertBefore = originalInsertBefore
+      HTMLScriptElement.prototype.setAttribute = originalSetAttribute
+      restoreSrc?.()
     }
   }, [])
 
