@@ -206,14 +206,17 @@ export default function App() {
                     <div className="wind-arrow-wrap">
                       <WindArrow
                         degrees={windRelative}
-                        size={168}
+                        size={160}
                         className="wind-arrow"
                         ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
                       />
                     </div>
                     <div className="wind-speed">
-                      <div className="huge">{formatSpeed(wx.windSpeed, units)}</div>
-                      <div className="small">Gust {formatSpeed(wx.windGust, units)}</div>
+                      <div className="wind-speed__value huge">{formatSpeed(wx.windSpeed, units)}</div>
+                      <div className="wind-speed__meta">
+                        <span className="pill">Now</span>
+                        <span className="wind-speed__gust">Gust {formatSpeed(wx.windGust, units)}</span>
+                      </div>
                     </div>
                   </div>
                   {headingStatus === "idle" && (
@@ -261,14 +264,17 @@ export default function App() {
                     <div className="wind-arrow-wrap">
                       <WindArrow
                         degrees={windRelativeNext}
-                        size={168}
+                        size={160}
                         className="wind-arrow"
                         ariaLabel={`Wind direction forecast ${windCardinalNext} ${windDegreesNext}°`}
                       />
                     </div>
                     <div className="wind-speed">
-                      <div className="huge">{formatSpeed(wx.nextHour.windSpeed, units)}</div>
-                      <div className="small">Gust {formatSpeed(wx.nextHour.windGust, units)}</div>
+                      <div className="wind-speed__value huge">{formatSpeed(wx.nextHour.windSpeed, units)}</div>
+                      <div className="wind-speed__meta">
+                        <span className="pill">+1h</span>
+                        <span className="wind-speed__gust">Gust {formatSpeed(wx.nextHour.windGust, units)}</span>
+                      </div>
                     </div>
                   </div>
                   {headingStatus === "idle" && (
