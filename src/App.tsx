@@ -49,6 +49,34 @@ export default function App() {
   }, [units])
 
   useEffect(() => {
+    if (typeof window === "undefined") return
+    const blockedHosts = ["cdn.segment.com", "sessions.bugsnag.com"]
+    const handleResourceError = (event: Event) => {
+      const target = event.target
+      if (
+        target instanceof HTMLScriptElement ||
+        target instanceof HTMLLinkElement ||
+        target instanceof HTMLImageElement
+      ) {
+        const source =
+          target instanceof HTMLLinkElement
+            ? target.href
+            : target instanceof HTMLImageElement
+              ? target.src
+              : target.src
+        if (source && blockedHosts.some((host) => source.includes(host))) {
+          event.stopImmediatePropagation()
+          event.preventDefault()
+        }
+      }
+    }
+    window.addEventListener("error", handleResourceError, true)
+    return () => {
+      window.removeEventListener("error", handleResourceError, true)
+    }
+  }, [])
+
+  useEffect(() => {
     if (geo.status !== "granted" || !geo.coords || courseManual) return
     setCourseLoading(true)
     setCourseError(null)
