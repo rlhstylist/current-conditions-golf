@@ -4,6 +4,8 @@ import { useGeo } from "./hooks/useGeo"
 import { loadCourse, pickNearest } from "./hooks/useCourse"
 import type { CourseState } from "./hooks/useCourse"
 import { useHeading } from "./hooks/useHeading"
+import FlippableCard from "./components/FlippableCard"
+import PrecipChart from "./components/PrecipChart"
 import WindArrow from "./components/WindArrow"
 import type { Course } from "./lib/overpass"
 import { fetchWeather, type Weather } from "./lib/openmeteo"
@@ -126,6 +128,23 @@ export default function App() {
     if (headingStatus !== "granted" || heading == null) return windDir
     return windDir - heading
   }, [heading, headingStatus, windDir])
+  const windDirNext = wx?.nextWindDir ?? windDir
+  const windCardinalNext = formatDir(windDirNext)
+  const windDegreesNext = Math.round(windDirNext)
+  const windRelativeNext = useMemo(() => {
+    if (headingStatus !== "granted" || heading == null) return windDirNext
+    return windDirNext - heading
+  }, [heading, headingStatus, windDirNext])
+  const windSpeedNext = wx?.nextWindSpeed ?? wx?.windSpeed ?? 0
+  const windGustNext = wx?.nextWindGust ?? wx?.windGust ?? 0
+  const tempNext = wx?.nextTemp ?? wx?.temp ?? 0
+  const feelsNext = wx?.nextFeels ?? wx?.feels ?? 0
+  const humidityNext = wx?.nextHumidity ?? wx?.humidity ?? 0
+  const uvNext = wx?.nextUv ?? wx?.uv ?? 0
+  const cloudNext = wx?.nextCloud ?? wx?.cloud ?? 0
+  const precipNext5h = wx?.precipChanceNext5h ?? []
+  const precipNext1h = precipNext5h[0] ?? wx?.precipChance1h ?? 0
+  const precipNext5hEnd = precipNext5h[precipNext5h.length - 1] ?? precipNext1h
   const updatedDisplay = useMemo(() => {
     if (!updatedAt) return "—"
     return updatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
@@ -180,109 +199,209 @@ export default function App() {
         )}
         {wx && (
           <div className="grid">
-            <div className="card wind-card span2">
-              <div className="wind-heading">
-                <p className="h2">Wind</p>
-                <span className="small">{windCardinal} · {windDegrees}°</span>
-              </div>
-              <div className="wind-hero">
-                <div className="wind-arrow-wrap">
-                  <WindArrow
-                    degrees={windRelative}
-                    size={168}
-                    className="wind-arrow"
-                    ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
-                  />
+            <FlippableCard
+              className="span2"
+              label="Wind +1h"
+              front={
+                <div className="card wind-card span2">
+                  <div className="wind-heading">
+                    <p className="h2">Wind</p>
+                    <span className="small">{windCardinal} · {windDegrees}°</span>
+                  </div>
+                  <div className="wind-hero">
+                    <div className="wind-arrow-wrap">
+                      <WindArrow
+                        degrees={windRelative}
+                        size={168}
+                        className="wind-arrow"
+                        ariaLabel={`Wind direction ${windCardinal} ${windDegrees}°`}
+                      />
+                    </div>
+                    <div className="wind-speed">
+                      <div className="huge">{formatSpeed(wx.windSpeed, units)}</div>
+                      <div className="small">Gust {formatSpeed(wx.windGust, units)}</div>
+                    </div>
+                  </div>
+                  {headingStatus === "idle" && (
+                    <button
+                      type="button"
+                      className="btn compass-btn"
+                      onClick={requestHeading}
+                      aria-label="Enable compass access for wind arrow"
+                    >
+                      Enable compass
+                    </button>
+                  )}
+                  {headingStatus === "pending" && (
+                    <div className="small muted" aria-live="polite">
+                      Waiting for compass permission…
+                    </div>
+                  )}
+                  {headingStatus === "denied" && (
+                    <div className="compass-retry" aria-live="polite">
+                      <div className="small muted">Compass access denied</div>
+                      <button
+                        type="button"
+                        className="btn compass-btn"
+                        onClick={requestHeading}
+                        aria-label="Retry enabling compass access"
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  )}
+                  {headingStatus === "unsupported" && (
+                    <div className="small muted" aria-live="polite">
+                      Compass not supported on this device
+                    </div>
+                  )}
                 </div>
-                <div className="wind-speed">
-                  <div className="huge">{formatSpeed(wx.windSpeed, units)}</div>
-                  <div className="small">Gust {formatSpeed(wx.windGust, units)}</div>
+              }
+              back={
+                <div className="card wind-card card--inverse span2">
+                  <div className="wind-heading">
+                    <p className="h2">Wind +1h</p>
+                    <span className="small">{windCardinalNext} · {windDegreesNext}°</span>
+                  </div>
+                  <div className="wind-hero">
+                    <div className="wind-arrow-wrap">
+                      <WindArrow
+                        degrees={windRelativeNext}
+                        size={168}
+                        className="wind-arrow"
+                        ariaLabel={`Wind direction in one hour ${windCardinalNext} ${windDegreesNext}°`}
+                      />
+                    </div>
+                    <div className="wind-speed">
+                      <div className="huge">{formatSpeed(windSpeedNext, units)}</div>
+                      <div className="small">Gust {formatSpeed(windGustNext, units)}</div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              {headingStatus === "idle" && (
-                <button
-                  type="button"
-                  className="btn compass-btn"
-                  onClick={requestHeading}
-                  aria-label="Enable compass access for wind arrow"
+              }
+            />
+            <FlippableCard
+              className="span2"
+              label="Climate +1h"
+              front={
+                <section
+                  className="card climate-card span2"
+                  aria-label="Temperature, humidity, UV index, and cloud cover"
                 >
-                  Enable compass
-                </button>
-              )}
-              {headingStatus === "pending" && (
-                <div className="small muted" aria-live="polite">
-                  Waiting for compass permission…
-                </div>
-              )}
-              {headingStatus === "denied" && (
-                <div className="compass-retry" aria-live="polite">
-                  <div className="small muted">Compass access denied</div>
-                  <button
-                    type="button"
-                    className="btn compass-btn"
-                    onClick={requestHeading}
-                    aria-label="Retry enabling compass access"
-                  >
-                    Try again
-                  </button>
-                </div>
-              )}
-              {headingStatus === "unsupported" && (
-                <div className="small muted" aria-live="polite">
-                  Compass not supported on this device
-                </div>
-              )}
-            </div>
-            <section
-              className="card climate-card span2"
-              aria-label="Temperature, humidity, UV index, and cloud cover"
-            >
-              <div className="climate-grid">
-                <div className="climate-temp">
-                  <div className="climate-line">
-                    <p className="small">Temperature</p>
-                    <div className="climate-main">{formatTemp(wx.temp, units)}</div>
+                  <div className="climate-grid">
+                    <div className="climate-temp">
+                      <div className="climate-line">
+                        <p className="small">Temperature</p>
+                        <div className="climate-main">{formatTemp(wx.temp, units)}</div>
+                      </div>
+                      <div className="climate-line">
+                        <p className="small">Feels</p>
+                        <div className="climate-main">{formatTemp(wx.feels, units)}</div>
+                      </div>
+                    </div>
+                    <div className="climate-stack">
+                      <div className="climate-item">
+                        <p className="small">Humidity</p>
+                        <div className="climate-value">{wx.humidity.toFixed(0)}%</div>
+                      </div>
+                      <div className="climate-item">
+                        <p className="small">UV</p>
+                        <div className="climate-value">{wx.uv.toFixed(1)}</div>
+                      </div>
+                      <div className="climate-item">
+                        <p className="small">Cloud</p>
+                        <div className="climate-value">{wx.cloud.toFixed(0)}%</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="climate-line">
-                    <p className="small">Feels</p>
-                    <div className="climate-main">{formatTemp(wx.feels, units)}</div>
+                </section>
+              }
+              back={
+                <section
+                  className="card climate-card card--inverse span2"
+                  aria-label="Temperature, humidity, UV index, and cloud cover +1h"
+                >
+                  <div className="climate-grid">
+                    <div className="climate-temp">
+                      <div className="climate-line">
+                        <p className="small">Temperature +1h</p>
+                        <div className="climate-main">{formatTemp(tempNext, units)}</div>
+                      </div>
+                      <div className="climate-line">
+                        <p className="small">Feels</p>
+                        <div className="climate-main">{formatTemp(feelsNext, units)}</div>
+                      </div>
+                    </div>
+                    <div className="climate-stack">
+                      <div className="climate-item">
+                        <p className="small">Humidity</p>
+                        <div className="climate-value">{humidityNext.toFixed(0)}%</div>
+                      </div>
+                      <div className="climate-item">
+                        <p className="small">UV</p>
+                        <div className="climate-value">{uvNext.toFixed(1)}</div>
+                      </div>
+                      <div className="climate-item">
+                        <p className="small">Cloud</p>
+                        <div className="climate-value">{cloudNext.toFixed(0)}%</div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="climate-stack">
-                  <div className="climate-item">
-                    <p className="small">Humidity</p>
-                    <div className="climate-value">{wx.humidity.toFixed(0)}%</div>
+                </section>
+              }
+            />
+            <FlippableCard
+              className="span2"
+              label="Precipitation +1h"
+              front={
+                <section className="card precip-card span2" aria-label="Precipitation outlook">
+                  <div className="precip-grid">
+                    <div className="precip-cell">
+                      <p className="h2">Next 1h</p>
+                      <div className="precip-value">{formatPercent(wx.precipChance1h)}</div>
+                      <p className="small">Chance</p>
+                    </div>
+                    <div className="precip-cell">
+                      <p className="h2">Next 3h</p>
+                      <div className="precip-value">{formatPercent(wx.precipChance3h)}</div>
+                      <p className="small">Chance</p>
+                    </div>
+                    <div className="precip-cell">
+                      <p className="h2">24h total</p>
+                      <div className="precip-value">{formatPrecip(wx.precip24h, units)}</div>
+                      <p className="small">Accumulation</p>
+                    </div>
                   </div>
-                  <div className="climate-item">
-                    <p className="small">UV</p>
-                    <div className="climate-value">{wx.uv.toFixed(1)}</div>
+                </section>
+              }
+              back={
+                <section
+                  className="card precip-card card--inverse span2"
+                  aria-label="Precipitation outlook +1h"
+                >
+                  <div className="precip-grid precip-grid-back">
+                    <div className="precip-cell precip-chart-cell">
+                      <p className="h2">Precipitation +1h</p>
+                      <PrecipChart
+                        values={precipNext5h}
+                        ariaLabel="Precipitation chance over the next five hours"
+                      />
+                      <p className="small">+1h to +5h</p>
+                    </div>
+                    <div className="precip-cell">
+                      <p className="h2">Next 1h</p>
+                      <div className="precip-value">{formatPercent(precipNext1h)}</div>
+                      <p className="small">Chance</p>
+                    </div>
+                    <div className="precip-cell">
+                      <p className="h2">At +5h</p>
+                      <div className="precip-value">{formatPercent(precipNext5hEnd)}</div>
+                      <p className="small">Chance</p>
+                    </div>
                   </div>
-                  <div className="climate-item">
-                    <p className="small">Cloud</p>
-                    <div className="climate-value">{wx.cloud.toFixed(0)}%</div>
-                  </div>
-                </div>
-              </div>
-            </section>
-            <section className="card precip-card span2" aria-label="Precipitation outlook">
-              <div className="precip-grid">
-                <div className="precip-cell">
-                  <p className="h2">Next 1h</p>
-                  <div className="precip-value">{formatPercent(wx.precipChance1h)}</div>
-                  <p className="small">Chance</p>
-                </div>
-                <div className="precip-cell">
-                  <p className="h2">Next 3h</p>
-                  <div className="precip-value">{formatPercent(wx.precipChance3h)}</div>
-                  <p className="small">Chance</p>
-                </div>
-                <div className="precip-cell">
-                  <p className="h2">24h total</p>
-                  <div className="precip-value">{formatPrecip(wx.precip24h, units)}</div>
-                  <p className="small">Accumulation</p>
-                </div>
-              </div>
-            </section>
+                </section>
+              }
+            />
           </div>
         )}
       </main>
