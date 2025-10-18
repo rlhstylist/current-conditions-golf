@@ -51,6 +51,19 @@ export default function App() {
   useEffect(() => {
     if (typeof window === "undefined") return
     const blockedHosts = ["cdn.segment.com", "sessions.bugsnag.com"]
+    const matchesBlocked = (value: unknown): boolean => {
+      if (!value) return false
+      if (typeof value === "string") {
+        return blockedHosts.some((host) => value.includes(host))
+      }
+      if (value instanceof Error) {
+        return matchesBlocked(value.message) || matchesBlocked(value.stack)
+      }
+      if (typeof value === "object") {
+        return Object.values(value as Record<string, unknown>).some((entry) => matchesBlocked(entry))
+      }
+      return false
+    }
     const handleResourceError = (event: Event) => {
       const target = event.target
       if (
@@ -64,15 +77,32 @@ export default function App() {
             : target instanceof HTMLImageElement
               ? target.src
               : target.src
-        if (source && blockedHosts.some((host) => source.includes(host))) {
+        if (source && matchesBlocked(source)) {
           event.stopImmediatePropagation()
           event.preventDefault()
         }
+      } else if (event instanceof ErrorEvent && matchesBlocked(event.message)) {
+        event.stopImmediatePropagation()
+        event.preventDefault()
       }
     }
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      if (matchesBlocked(event.reason)) {
+        event.preventDefault()
+      }
+    }
+    const originalConsoleError = window.console.error
+    const consoleError: typeof originalConsoleError = (...args) => {
+      if (args.some((arg) => matchesBlocked(arg))) return
+      originalConsoleError(...args)
+    }
+    window.console.error = consoleError
     window.addEventListener("error", handleResourceError, true)
+    window.addEventListener("unhandledrejection", handleRejection)
     return () => {
       window.removeEventListener("error", handleResourceError, true)
+      window.removeEventListener("unhandledrejection", handleRejection)
+      window.console.error = originalConsoleError
     }
   }, [])
 
