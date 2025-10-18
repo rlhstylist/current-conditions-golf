@@ -14,7 +14,7 @@ function normalize(deg: number) {
 }
 
 export default function WindArrow({ degrees, size = 44, className, ariaLabel }: WindArrowProps) {
-  const rotation = normalize(degrees)
+  const rotation = normalize(degrees + 180)
   const spanStyle: CSSProperties = {
     width: size,
     height: size,
