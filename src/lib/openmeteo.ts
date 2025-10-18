@@ -60,6 +60,57 @@ function pick(arr: number[], index: number, fallback: number): number {
   return Number.isFinite(value) ? value : fallback
 }
 
+function parseTimestamp(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value > 1e12 ? value : value * 1000
+  }
+  if (typeof value === "string") {
+    const parsed = Date.parse(value)
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return null
+}
+
+function resolveHourIndices(times: unknown[], currentTime: unknown): { current: number; next: number } {
+  if (!Array.isArray(times) || times.length === 0) {
+    return { current: 0, next: 0 }
+  }
+
+  const parsedTimes = times.map((value) => parseTimestamp(value))
+  const currentStamp = parseTimestamp(currentTime)
+
+  if (currentStamp == null) {
+    const nextIndex = parsedTimes.findIndex((stamp) => typeof stamp === "number")
+    if (nextIndex <= 0) {
+      return { current: 0, next: Math.min(1, parsedTimes.length - 1) }
+    }
+    return { current: nextIndex - 1, next: nextIndex }
+  }
+
+  let currentIndex = 0
+  let nextIndex = Math.min(1, parsedTimes.length - 1)
+
+  for (let i = 0; i < parsedTimes.length; i += 1) {
+    const stamp = parsedTimes[i]
+    if (typeof stamp !== "number") continue
+
+    if (stamp <= currentStamp) {
+      currentIndex = i
+      nextIndex = Math.min(i + 1, parsedTimes.length - 1)
+      continue
+    }
+
+    nextIndex = i
+    break
+  }
+
+  if (nextIndex < currentIndex) {
+    nextIndex = Math.min(currentIndex + 1, parsedTimes.length - 1)
+  }
+
+  return { current: currentIndex, next: nextIndex }
+}
+
 export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
   const url = new URL("https://api.open-meteo.com/v1/forecast")
   url.searchParams.set("latitude", String(lat))
@@ -98,6 +149,7 @@ export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
   const j = await res.json()
 
   const cur = j.current
+  const hourlyTimes = Array.isArray(j.hourly?.time) ? (j.hourly.time as unknown[]) : []
   const hourlyPrecip = asNumberArray(j.hourly?.precipitation ?? [])
   const probability: number[] = asNumberArray(j.hourly?.precipitation_probability ?? []).map(
     (value) => clampProbability(value)
@@ -111,12 +163,13 @@ export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
   const hourlyUv = asNumberArray(j.hourly?.uv_index ?? [])
   const hourlyCloud = asNumberArray(j.hourly?.cloud_cover ?? [])
 
-  // Next windows starting "now" (best-effort; open-meteo returns future hours)
-  const precip24h = sum(hourlyPrecip, 24)
-  const precipChance1h = maxWindow(probability, 1)
-  const precipChance3h = maxWindow(probability, 3)
+  const { current: currentIndex, next: nextIndex } = resolveHourIndices(hourlyTimes, cur?.time)
 
-  const nextIndex = 1
+  // Next windows starting "now" (best-effort; open-meteo returns future hours)
+  const precip24h = sum(hourlyPrecip.slice(currentIndex), 24)
+  const precipChance1h = maxWindow(probability.slice(currentIndex), 1)
+  const precipChance3h = maxWindow(probability.slice(currentIndex), 3)
+
   const nextHour = {
     windSpeed: pick(hourlyWindSpeed, nextIndex, Number(cur?.wind_speed_10m ?? 0)),
     windGust: pick(hourlyWindGust, nextIndex, Number(cur?.wind_gusts_10m ?? 0)),
@@ -131,10 +184,7 @@ export async function fetchWeather(lat: number, lon: number): Promise<Weather> {
     precip24h: sum(hourlyPrecip.slice(nextIndex), 24),
   }
 
-  const precipChanceNext5h = takeSlice(
-    probability.slice(nextIndex).map((value) => clampProbability(value)),
-    5
-  )
+  const precipChanceNext5h = takeSlice(probability.slice(nextIndex), 5)
 
   return {
     windSpeed: Number(cur?.wind_speed_10m ?? 0),
