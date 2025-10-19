@@ -151,24 +151,18 @@ export default function App() {
   return (
     <div className="wrapper">
       <header className="topbar">
-        <p className="course h1" aria-live="polite" style={courseStyle}>
-          {courseLabel}
-        </p>
-        <button
-          className="btn"
-          type="button"
-          onClick={toggleUnits}
-          aria-label={units === "imperial" ? "Switch to metric units" : "Switch to imperial units"}
-        >
-          {units === "imperial" ? "°F · mph" : "°C · km/h"}
-        </button>
-      </header>
-
-      {(showLocationPrompt || showStatus) && (
-        <div className="row controls">
+        <div className="identity">
+          <span className="badge" aria-hidden="true">
+            Nearest course
+          </span>
+          <p className="course h1" aria-live="polite" style={courseStyle}>
+            {courseLabel}
+          </p>
+        </div>
+        <div className="topbar-controls">
           {showLocationPrompt && (
             <button
-              className="btn"
+              className="btn btn--primary"
               type="button"
               onClick={() => void request()}
               aria-label="Enable location access"
@@ -176,15 +170,25 @@ export default function App() {
               Enable location
             </button>
           )}
-          {showStatus && statusLabel && (
-            <span className="small" aria-live="polite">
-              {statusLabel}
-            </span>
-          )}
+          <button
+            className="btn btn--toggle"
+            type="button"
+            onClick={toggleUnits}
+            aria-label={units === "imperial" ? "Switch to metric units" : "Switch to imperial units"}
+          >
+            {units === "imperial" ? "°F · mph" : "°C · km/h"}
+          </button>
+        </div>
+      </header>
+
+      {showStatus && statusLabel && (
+        <div className="status-strip" aria-live="polite">
+          <span className="status-strip__pulse" aria-hidden="true" />
+          <span className="status-strip__text">{statusLabel}</span>
         </div>
       )}
 
-      <main>
+      <main className="dashboard">
         {err && <div className="card small">Error: {err}</div>}
         {!wx && geo.status !== "granted" && (
           <div className="card small center">
