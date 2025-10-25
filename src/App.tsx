@@ -148,54 +148,106 @@ export default function App() {
   const showLocationPrompt = geo.status !== "granted"
   const showStatus = !course?.name && Boolean(statusLabel)
 
+  const hasCourseName = Boolean(course?.name)
+
   return (
-    <div className="wrapper">
-      <header className="topbar">
-        <p className="course h1" aria-live="polite" style={courseStyle}>
-          {courseLabel}
-        </p>
-        <button
-          className="btn"
-          type="button"
-          onClick={toggleUnits}
-          aria-label={units === "imperial" ? "Switch to metric units" : "Switch to imperial units"}
-        >
-          {units === "imperial" ? "°F · mph" : "°C · km/h"}
-        </button>
-      </header>
-
-      {(showLocationPrompt || showStatus) && (
-        <div className="row controls">
-          {showLocationPrompt && (
-            <button
-              className="btn"
-              type="button"
-              onClick={() => void request()}
-              aria-label="Enable location access"
+    <div className="app-shell">
+      <div className="wrapper">
+        <header className="topbar">
+          <svg className="topbar__glyph" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+            <path
+              d="M32 4 12 16v20l20 12 20-12V16L32 4Zm0 8 12 7v14l-12 7-12-7V19l12-7Z"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="m12 16 20 12 20-12M12 36l20 12 20-12"
+              fill="none"
+              stroke="currentColor"
+              strokeOpacity="0.4"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <div className="topbar__copy">
+            <p
+              className={`course h1${hasCourseName ? " course--active" : ""}`}
+              aria-live="polite"
+              style={courseStyle}
             >
-              Enable location
-            </button>
-          )}
-          {showStatus && statusLabel && (
-            <span className="small" aria-live="polite">
-              {statusLabel}
-            </span>
-          )}
-        </div>
-      )}
+              {hasCourseName ? (
+                <>
+                  <span className="course-prefix">Starting</span>
+                  <span className="course-name">{course?.name}</span>
+                </>
+              ) : (
+                courseLabel
+              )}
+            </p>
+            <span className="brand">Reality engine: humans$ run terra_mater.sim</span>
+          </div>
+          <button
+            className="btn"
+            type="button"
+            onClick={toggleUnits}
+            aria-label={units === "imperial" ? "Switch to metric units" : "Switch to imperial units"}
+          >
+            {units === "imperial" ? "°F · mph" : "°C · km/h"}
+          </button>
+        </header>
 
-      <main>
-        {err && <div className="card small">Error: {err}</div>}
-        {!wx && geo.status !== "granted" && (
-          <div className="card small center">
-            Enable location to load the nearest course and live weather.
+        {(showLocationPrompt || showStatus) && (
+          <div className="row controls">
+            {showLocationPrompt && (
+              <button
+                className="btn"
+                type="button"
+                onClick={() => void request()}
+                aria-label="Enable location access"
+              >
+                Enable location
+              </button>
+            )}
+            {showStatus && statusLabel && (
+              <span className="small" aria-live="polite">
+                {statusLabel}
+              </span>
+            )}
           </div>
         )}
+
         {wx && (
-          <div className="grid">
-            <FlippableCard
-              className="span2"
-              title="Wind"
+          <section className="loader-block" aria-label="Current atmospheric summary">
+            <p className="loader-title">LOADING…</p>
+            <ul className="loader-list">
+              <li>
+                Wind {formatSpeed(wx.windSpeed, units)} · {windCardinal} {windDegrees}°
+              </li>
+              <li>Gusts {formatSpeed(wx.windGust, units)}</li>
+              <li>Feels like {formatTemp(wx.feels, units)}</li>
+              <li>Humidity {formatPercent(wx.humidity)}</li>
+              <li>Cloud cover {formatPercent(wx.cloud)}</li>
+              <li>Precip next hr {formatPercent(wx.precipChance1h)}</li>
+            </ul>
+          </section>
+        )}
+
+        <main>
+          {err && <div className="card small">Error: {err}</div>}
+          {!wx && geo.status !== "granted" && (
+            <div className="card small center">
+              Enable location to load the nearest course and live weather.
+            </div>
+          )}
+          {wx && (
+            <div className="grid">
+              <FlippableCard
+                className="span2"
+                title="Wind"
               front={
                 <div className="card wind-card span2">
                   <div className="wind-heading">
@@ -427,16 +479,17 @@ export default function App() {
                 </section>
               }
             />
-          </div>
-        )}
-      </main>
+            </div>
+          )}
+        </main>
 
-      <footer className="footer">
-        <span className="updated">
-          Updated {" "}
-          <time dateTime={updatedDateTime}>{updatedDisplay}</time>
-        </span>
-      </footer>
+        <footer className="footer">
+          <span className="updated">
+            Updated {" "}
+            <time dateTime={updatedDateTime}>{updatedDisplay}</time>
+          </span>
+        </footer>
+      </div>
     </div>
   )
 }
